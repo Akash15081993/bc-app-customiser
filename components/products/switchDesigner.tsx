@@ -1,14 +1,16 @@
 import { Flex, FlexItem, Switch } from "@bigcommerce/big-design";
+import languageEN from "lang/en";
 import { useState } from "react";
 
 const SwitchDesigner = (props) => {
 
     const {jwtToken, pageLoading, serachButtonLoading, pageSuccess, pageRender, productId, productName, productSku, modifiers, defaultImage } = props;
+    const { modifierDisplayNames } = languageEN;
 
     let alreadyDesigner = false;
     if(modifiers?.length > 0){
         modifiers?.map((ls) => {
-            if(ls?.display_name == "View Design"){ alreadyDesigner = true; }
+            if(ls?.display_name == modifierDisplayNames.viewDesign){ alreadyDesigner = true; }
         })
     }
 
@@ -23,7 +25,7 @@ const SwitchDesigner = (props) => {
             setChecked(!checked);
             setTimeout(async () => {
                 
-                await fetch(`/api/products/modifiers?context=${jwtToken}`, {
+                await fetch(`/api/server/products/modifiers?context=${jwtToken}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ productId, productSku, productName, defaultImage, designerChecked:checked }),

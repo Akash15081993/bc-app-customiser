@@ -1,8 +1,4 @@
-import { Box, Flex, H1, H4, Panel } from '@bigcommerce/big-design';
-import styled from 'styled-components';
-import ErrorMessage from '../components/error';
-import Loading from '../components/loading';
-import { useProducts } from '../lib/hooks';
+import { Flex, H4, Panel } from '@bigcommerce/big-design';
 
 const Index = () => {
     return (

@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { mysqlQuery } from '@lib/dbs/mysql';
 import { bigcommerceClient, getSession } from '@lib/auth';
+import languageEN from 'lang/en';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -15,57 +16,13 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             const jwtPlayload = req?.query?.context;
 
             if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+            const { modifierDisplayNames, modifierOptions } = languageEN;
             
             if (!productId || isNaN(Number(productId)) || Number(productId) <= 0 && designerChecked == true && jwtPlayload == "") {
                 return res.status(400).json({ status : false, message: "Invalid product ID." });
             }
     
-            const optionYourDesignIdBody =  {
-                "display_name": "Design Id",
-                "type": "text",
-                "required": false,
-                "sort_order": 1,
-                "config": {
-                    "default_value": "",
-                    "text_characters_limited": false,
-                    "text_min_length": 0,
-                    "text_max_length": 0
-                },
-                "option_values": []
-            };
-            const optionYourDesignBody =  {
-                "display_name": "View Design",
-                "type": "text",
-                "required": false,
-                "sort_order": 2,
-                "config": {
-                    "default_value": "",
-                    "text_characters_limited": false,
-                    "text_min_length": 0,
-                    "text_max_length": 0
-                },
-                "option_values": []
-            };
-            const optionYourDesignAreaBody =  {
-                "display_name": "Design Area",
-                "type": "multi_line_text",
-                "required": false,
-                "sort_order": 3,
-                "config": {
-                    "default_value": "",
-                    "text_characters_limited": false,
-                    "text_min_length": 0,
-                    "text_max_length": 0
-                },
-                "option_values": []
-            };
-            
-            // await Promise.all([
-            //     bigcommerce.post(`/catalog/products/${productId}/modifiers`, optionYourDesignIdBody),
-            //     bigcommerce.post(`/catalog/products/${productId}/modifiers`, optionYourDesignBody),
-            //     bigcommerce.post(`/catalog/products/${productId}/modifiers`, optionYourDesignAreaBody),
-            // ]);
-
             const tryCreateModifier = async (body: any) => {
                 try {
                     await bigcommerce.post(`/catalog/products/${productId}/modifiers`, body);
@@ -78,9 +35,24 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                 }
             };
 
-            await tryCreateModifier(optionYourDesignIdBody);
-            await tryCreateModifier(optionYourDesignBody);
-            await tryCreateModifier(optionYourDesignAreaBody);
+            // Dynamically generate all modifier configs based on displayNames
+            const displayNamesWithSort = [
+                { name: modifierDisplayNames.designId, order: 1 },
+                { name: modifierDisplayNames.viewDesign, order: 2 },
+                { name: modifierDisplayNames.designArea, order: 3, type: 'multi_line_text' }
+            ];
+
+            await Promise.allSettled(
+                displayNamesWithSort.map(({ name, order, type }) => {
+                    const optionBody = {
+                    ...modifierOptions,
+                    display_name: name,
+                    sort_order: order,
+                    type: type || modifierOptions.type
+                    };
+                    return tryCreateModifier(optionBody);
+                })
+            );
 
             //First Delete Product
             await mysqlQuery('DELETE FROM products WHERE storeHash = ? AND productId = ?',[storeHash, productId]);

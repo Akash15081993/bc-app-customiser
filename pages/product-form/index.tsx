@@ -41,14 +41,11 @@ const ProductForm = () => {
     per_page: 5,
   });
 
-  console.log("encodedContext V1");
-  console.log(encodedContext);
-
   const searchProduct = async (page = 1, perPage = itemsPerPage) => {
     console.log('Init searchProduct')
     setSerachButtonLoading(true);
     setpageLoading(false)
-    const res = await fetch(`/api/products/search?context=${encodedContext}`, {
+    const res = await fetch(`/api/server/products/search?context=${encodedContext}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ keyword: searchTerm, page, limit: perPage }),
@@ -234,7 +231,6 @@ const ProductForm = () => {
           <Flex justifyContent="center">
               <FlexItem>No Data</FlexItem>
           </Flex>
-          
         </Panel>
       )}
 

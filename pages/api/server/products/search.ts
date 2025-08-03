@@ -1,5 +1,5 @@
+import { bigcommerceClient, getSession } from '@lib/auth';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { bigcommerceClient, getSession } from '../../../lib/auth';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {

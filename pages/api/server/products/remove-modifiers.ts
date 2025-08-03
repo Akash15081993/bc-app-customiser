@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { mysqlQuery } from '@lib/dbs/mysql';
 import { bigcommerceClient, getSession } from '@lib/auth';
+import languageEN from 'lang/en';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -19,10 +20,12 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                 return res.status(400).json({ status : false, message: "Invalid product ID." });
             }
 
+            const { modifierDisplayNames } = languageEN;
+
             const fetchFilteredModifierIds = async (productId: number, limit: number = 50) => {
                 let page = 1;
                 let matchingModifierIds: number[] = [];
-                const targetDisplayNames = ["Design Id", "View Design", "Design Area"];
+                const targetDisplayNames = [ modifierDisplayNames.designId, modifierDisplayNames.viewDesign, modifierDisplayNames.designArea ];
 
                 while (true) {
                     const response = await bigcommerce.get(`/catalog/products/${productId}/modifiers?limit=${limit}&page=${page}`);
