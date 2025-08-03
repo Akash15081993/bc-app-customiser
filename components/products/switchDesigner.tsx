@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const SwitchDesigner = (props) => {
 
-    const {jwtToken, pageLoading, serachButtonLoading, pageSuccess, pageRender, productId, name, modifiers } = props;
+    const {jwtToken, pageLoading, serachButtonLoading, pageSuccess, pageRender, productId, productName, productSku, modifiers, defaultImage } = props;
 
     let alreadyDesigner = false;
     if(modifiers?.length > 0){
@@ -22,15 +22,18 @@ const SwitchDesigner = (props) => {
             serachButtonLoading(true);
             setChecked(!checked);
             setTimeout(async () => {
-                await fetch(`https://dev.moiley.in/api/products/modifiers?context=${jwtToken}`, {
+                
+                await fetch(`/api/products/modifiers?context=${jwtToken}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ productId : productId, designerChecked:checked }),
+                    body: JSON.stringify({ productId, productSku, productName, defaultImage, designerChecked:checked }),
                 });
+                
                 pageLoading(false);
                 serachButtonLoading(false);
-                pageSuccess(`Product ( ${name} ) added successfully for customization.|@|Please go to the admin portal to update the design of the add-on.`);
+                pageSuccess(`Product ( ${productName} ) added successfully for customization.|@|Please go to the admin portal to update the design of the add-on.`);
                 pageRender((prev) => !prev);
+
             }, 100);
         }
     };

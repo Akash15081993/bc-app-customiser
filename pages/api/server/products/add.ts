@@ -1,0 +1,35 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import { mysqlQuery } from '@lib/dbs/mysql';
+import { getSession } from '@lib/auth';
+
+export default async function list(req: NextApiRequest, res: NextApiResponse) {
+    try {
+        
+        if (req.method === 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+        try {
+            const { productId, productSku, productName } = req?.body;
+            const { storeHash, user} = await getSession(req);
+
+            if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+            const productBody = { storeHash, userId : user?.id, productId, productSku, productName };
+            
+            //First Delete Product
+            await mysqlQuery('DELETE FROM products WHERE storeHash = ? AND productId = ?',[storeHash, productId]);
+
+            //Save product
+            await mysqlQuery('REPLACE INTO products SET ?', productBody);
+
+            res.status(200).json({ success: true, message: "Success." });
+
+        } catch (error) {
+            console.error('DB Error:', error);
+            res.status(500).json({ success: false, error: 'Internal server error' });
+        }
+
+    } catch (error) {
+        const { message, response } = error;
+        res.status(response?.status || 500).json({ message });
+    }
+}

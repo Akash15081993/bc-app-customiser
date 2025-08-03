@@ -7,7 +7,7 @@ import ErrorMessage from '../../components/error';
 import Loading from '../../components/loading';
 import { useProductList } from '../../lib/hooks';
 import { TableItem } from '../../types';
-import SwitchDesigner from '@components/switchDesigner';
+import SwitchDesigner from '@components/products/switchDesigner';
 
 const Products = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);

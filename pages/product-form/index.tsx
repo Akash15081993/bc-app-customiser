@@ -9,7 +9,7 @@ import {
   Table,
 } from "@bigcommerce/big-design";
 import Loading from "@components/loading";
-import SwitchDesigner from "@components/switchDesigner";
+import SwitchDesigner from "@components/products/switchDesigner";
 import { StringKeyValue } from "@types";
 import { useSession } from "context/session";
 import { useEffect, useState } from "react";
@@ -102,7 +102,7 @@ const ProductForm = () => {
 
   const renderImage = (images: any[] = []) => {
     const thumbnail = images.find((img) => img?.is_thumbnail)?.url_thumbnail;
-    const fallback = "https://cdn11.bigcommerce.com/s-vpkhnmqpak/stencil/fb255700-2286-013d-541b-7ab15761d798/img/ProductDefault.gif";
+    const fallback = "/coming-soon-img.gif";
     return (
       <img
         src={thumbnail || fallback}
@@ -111,6 +111,11 @@ const ProductForm = () => {
         alt="Product"
       />
     );
+  };
+
+  const renderImageDefaultImage = (images: any[] = []) => {
+    const thumbnail = images.find((img) => img?.is_thumbnail)?.url_thumbnail;
+    return thumbnail || null;
   };
 
   useEffect(() => {
@@ -188,17 +193,19 @@ const ProductForm = () => {
               {
                 header: "Designer",
                 hash: "designer",
-                render: ({ id, name, modifiers }) => (
+                render: ({ id, sku, name, modifiers, images }) => (
                   <SwitchDesigner
                     {...{
                       pageLoading: setpageLoading,
-                      serachButtonLoading: setSerachButtonLoading,
                       pageSuccess: setPageSuccess,
+                      serachButtonLoading: setSerachButtonLoading,
                       pageRender: setPageRender,
                       productId: id,
-                      name,
+                      productSku: sku ? sku : "-",
+                      productName:name,
                       modifiers,
-                      jwtToken:encodedContext
+                      jwtToken:encodedContext,
+                      defaultImage:renderImageDefaultImage(images)
                     }}
                   />
                 ),
