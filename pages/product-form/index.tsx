@@ -1,5 +1,7 @@
 import {
   Button,
+  Flex,
+  FlexItem,
   FormGroup,
   Input,
   Message,
@@ -46,7 +48,6 @@ const ProductForm = () => {
     console.log('Init searchProduct')
     setSerachButtonLoading(true);
     setpageLoading(false)
-    setPageSuccess('')
     const res = await fetch(`/api/products/search?context=${encodedContext}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -128,6 +129,7 @@ const ProductForm = () => {
           <Message
             marginVertical="medium"
             messages={[{ text: pageError }]}
+            onClose={() => setPageError('')}
             type="error"
           />
         )}
@@ -164,6 +166,7 @@ const ProductForm = () => {
           header={pageSuccess.split("|@|")[0]}
           marginVertical="medium"
           messages={[{ text: pageSuccess.split("|@|")[1] }]}
+          onClose={() => setPageSuccess('')}
           type="success"
         />
       )}
@@ -195,6 +198,7 @@ const ProductForm = () => {
                       productId: id,
                       name,
                       modifiers,
+                      jwtToken:encodedContext
                     }}
                   />
                 ),
@@ -218,7 +222,14 @@ const ProductForm = () => {
         </Panel>
       )}
 
-      {currentItems?.length == 0 && <Panel>No Data</Panel>}
+      { currentItems?.length == 0 && (
+        <Panel>
+          <Flex justifyContent="center">
+              <FlexItem>No Data</FlexItem>
+          </Flex>
+          
+        </Panel>
+      )}
 
       {pageLoading && <Loading />}
     </>

@@ -6,7 +6,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         const { keyword, page = 1, limit = 10 } = req.body;
         const { accessToken, storeHash } = await getSession(req);
         const bigcommerce = bigcommerceClient(accessToken, storeHash);
-         const response = await bigcommerce.get(`/catalog/products?keyword=${encodeURIComponent(keyword)}&limit=${limit}&page=${page}&include_fields=id,name,sku&include=modifiers,images`);
+         const response = await bigcommerce.get(`/catalog/products?keyword=${encodeURIComponent(keyword)}&limit=${limit}&page=${page}&include_fields=id,name,sku&include=modifiers,images&direction=desc`);
         res.status(200).json(response);
     } catch (error) {
         const { message, response } = error;

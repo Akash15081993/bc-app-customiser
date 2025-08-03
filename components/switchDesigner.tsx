@@ -3,12 +3,12 @@ import { useState } from "react";
 
 const SwitchDesigner = (props) => {
 
-    const {pageLoading, serachButtonLoading, pageSuccess, pageRender, productId, name, modifiers } = props;
+    const {jwtToken, pageLoading, serachButtonLoading, pageSuccess, pageRender, productId, name, modifiers } = props;
 
     let alreadyDesigner = false;
     if(modifiers?.length > 0){
         modifiers?.map((ls) => {
-            if(ls?.display_name == "View Your Design"){ alreadyDesigner = true; }
+            if(ls?.display_name == "View Design"){ alreadyDesigner = true; }
         })
     }
 
@@ -16,17 +16,22 @@ const SwitchDesigner = (props) => {
 
     const handleChange = (e) => {
         pageSuccess('')
-        const productId = e?.target?.value;
+        const productId = parseInt(e?.target?.value);
         if(productId > 0){
             pageLoading(true);
             serachButtonLoading(true);
             setChecked(!checked);
-            setTimeout(() => {
+            setTimeout(async () => {
+                await fetch(`https://dev.moiley.in/api/products/modifiers?context=${jwtToken}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ productId : productId, designerChecked:checked }),
+                });
                 pageLoading(false);
                 serachButtonLoading(false);
                 pageSuccess(`Product ( ${name} ) added successfully for customization.|@|Please go to the admin portal to update the design of the add-on.`);
                 pageRender((prev) => !prev);
-            }, 4000);
+            }, 100);
         }
     };
 
