@@ -7,6 +7,19 @@ const ProductActionDropdown = (props) => {
     const {pageRender, pageSuccess, pageLoading, id, productId, jwtToken } = props;
 
     const handleProductSync = (id:any, productId:any) => {
+        if(productId > 0){
+            setTimeout(async () => {
+                pageLoading(true);
+                await fetch(`/api/server/products/sync?context=${jwtToken}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, productId }),
+                });
+                pageLoading(false);
+                pageSuccess(`Product sync successfully.`);
+                pageRender((prev) => !prev);
+            }, 100);
+        }
     };
 
     const handleRemove = (id, productId) => {

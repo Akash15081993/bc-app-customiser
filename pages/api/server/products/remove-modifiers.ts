@@ -46,7 +46,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
 
             //Get modifiers Ids
-            const modifierIds = await fetchFilteredModifierIds(107, 50);
+            const modifierIds = await fetchFilteredModifierIds(productId, 50);
             
             //Delete modifiers
             if(modifierIds.length > 0) {

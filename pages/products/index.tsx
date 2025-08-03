@@ -138,8 +138,8 @@ const Products = () => {
                         width: "80",
                     },
                     { header: "Name", hash: "name", render: ({ productName }) => productName },
-                    { header: "SKU", hash: "sku", render: ({ productSku, productId, id }) => productSku +" -  "+ productId +" -  "+ id },
-                    { header: "Action", hash: "action", render: ({ productSku, productId, id }) => <ProductActionDropdown {...{pageRender: setPageRender,pageLoading: setpageLoading,
+                    { header: "SKU", hash: "sku", render: ({ productSku  }) => productSku },
+                    { header: "Action", hash: "action", render: ({ productId, id }) => <ProductActionDropdown {...{pageRender: setPageRender,pageLoading: setpageLoading,
                       pageSuccess: setPageSuccess, productId, id, jwtToken: encodedContext}} />, align:"left", width:80 },
                 ]}
                 items={currentItems}
