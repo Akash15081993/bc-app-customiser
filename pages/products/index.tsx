@@ -158,7 +158,9 @@ const Products = () => {
 
             { !pageLoading && currentItems?.length == 0 && (
                 <Flex justifyContent="center" style={{padding:'40px 0'}}>
-                    <FlexItem>You have no any product for design. Kindly include a new product in the design.</FlexItem>
+                    <FlexItem>
+                        <center>You have no any product for design. Kindly include a new product in the design.</center>
+                    </FlexItem>
                 </Flex>
             )}
             

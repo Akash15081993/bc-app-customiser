@@ -76,13 +76,14 @@ const Header = () => {
     if (headerType === HeaderTypes.INNER) return <InnerHeader />;
 
     return (
-        <Box marginBottom="xxLarge" style={{background:"#fff","padding":"10px", borderRadius : "0.25rem", boxShadow:"0px 1px 6px rgba(49,52,64,0.2)"}}>
+        <header className='app-top-header'>
+            <img className='app-top-logo' src='/assets/app-logo.png' width={130} height={40} onClick={() => { router.push(`/`) }} />
             <Tabs
                 activeTab={activeTab}
                 items={items}
                 onTabClick={handleTabClick}
             />
-        </Box>
+        </header>
     );
 };
 
