@@ -1,46 +1,165 @@
-import { Box, Button, Flex, FlexItem, FormGroup, Input, Panel, Switch } from "@bigcommerce/big-design";
-import { AddIcon, AssignmentIcon, CheckIcon } from "@bigcommerce/big-design-icons";
-import { useProductList } from "@lib/hooks";
+import {
+  Box,
+  Button,
+  Flex,
+  Input,
+  Message,
+  Panel,
+  Switch,
+} from "@bigcommerce/big-design";
+import { AddIcon, AssignmentIcon } from "@bigcommerce/big-design-icons";
+import { css } from "@codemirror/lang-css";
+import Loading from "@components/loading";
+import ReactCodeMirror, { oneDark } from "@uiw/react-codemirror";
 import { useSession } from "context/session";
 import { useState } from "react";
 
+const MAX_LENGTH = 5000;
+
 const Settings = () => {
-  const [ enableShare, setEnableShare] = useState(false);
+  const encodedContext = useSession()?.context;
+  const [enableShare, setEnableShare] = useState(false);
+  const [designerButton, setDesignerButton] = useState("");
+  const initialCss = `.my-custom-css{color:red;}`;
+  const [cssCode, setCssCode] = useState(initialCss);
+  const [saveButtonLoading, setSaveButtonLoading] = useState(false);
+
+  const [pageSuccess, setPageSuccess] = useState("");
+  const [pageError, setPageError] = useState("");
+
   const handleChange = () => setEnableShare(!enableShare);
 
-    return (
-        <Panel id="settings">
-            
-            <h2 style={{margin:'0 0 20px 0'}}><AssignmentIcon /> General Settings</h2>
+  const handleSaveData = async () => {
+    setSaveButtonLoading(true);
+    setPageError('')
+    setPageSuccess('');
 
-            <Panel>
-                <Flex justifyContent="space-between">
-                    Enable share button <Switch checked={enableShare} onChange={handleChange} />
-                </Flex>
-            </Panel>
+    const setSettings = await fetch(
+      `/api/server/settings/add?context=${encodedContext}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enableShare, designerButton, cssCode }),
+      }
+    );
 
-            <Panel>
-                <Input
-                    label="Custom selector for Designer Button"
-                    description="Enter the class or ID of the location where you want the button (if using a custom theme)."
-                    name="name"
-                    required
-                    value={''}
-                    placeholder="Example: .add-to-cart-buttons"
-                    width="small"
-                    onChange={(e) => {}}
-                />
-            </Panel>
+    const getSettings = await setSettings.json();
 
-            <Box style={{margin:'20px 0 0 0'}}>
-                <Button variant="primary">
-                    <AddIcon/> Save
+    setSaveButtonLoading(false);
+
+    if (getSettings?.status == false) {
+      setPageError(getSettings?.message);
+      return;
+    }
+
+    setPageSuccess("General settings updated successfully.");
+
+  };
+
+  const validateCss = (value: string) => {
+    if (value.length > MAX_LENGTH) {
+      return `CSS exceeds ${MAX_LENGTH} characters`;
+    }
+
+    // Basic SQL injection patterns (not foolproof, but helpful)
+    const sqlKeywords = /(insert|update|delete|drop|union|--)/i;
+    if (sqlKeywords.test(value)) {
+      return 'Invalid content detected in CSS (SQL keywords not allowed)';
+    }
+
+    // Optional: block @import or javascript: URLs
+    const dangerousPatterns = /(@import|javascript:|expression\()/i;
+    if (dangerousPatterns.test(value)) {
+      return 'Unsafe CSS detected (e.g., @import or javascript:)';
+    }
+
+    return ''; // No error
+  };
+
+  const [error, setError] = useState('');
+
+  const handleChangeCssCode = (value: string) => {
+    const validationError = validateCss(value);
+    setError(validationError);
+    setCssCode(value);
+  };
+
+  if (saveButtonLoading) return <Loading />;
+
+  return (
+    <Panel id="settings">
+      <h2 style={{ margin: "0 0 20px 0" }}>
+        <AssignmentIcon /> General Settings
+      </h2>
+
+      {pageError && (
+        <Message
+          marginVertical="medium"
+          messages={[{ text: pageError }]}
+          onClose={() => setPageError("")}
+          type="error"
+          style={{ marginBottom: "20px" }}
+        />
+      )}
+
+      {pageSuccess && (
+        <Message
+          messages={[{ text: pageSuccess }]}
+          marginVertical="medium"
+          onClose={() => setPageSuccess("")}
+          type="success"
+          style={{ marginBottom: "20px" }}
+        />
+      )}
+
+      <Panel>
+        <Flex justifyContent="space-between">
+          Enable share button <Switch checked={enableShare} onChange={handleChange} />
+        </Flex>
+      </Panel>
+
+      <Panel>
+        <Input
+          label="Custom selector for Designer Button"
+          description="Enter the class or ID of the location where you want the button (if using a custom theme)."
+          name="name"
+          required
+          value={designerButton}
+          placeholder="Example: .add-to-cart-buttons"
+          width="small"
+          onChange={(e) => {
+            setDesignerButton(e.target.value);
+          }}
+        />
+      </Panel>
+
+      <Panel>
+        <p style={{ margin: "0 0 5px 0" }}>Custom CSS</p>
+        <ReactCodeMirror
+          value={cssCode}
+          height="200px"
+          theme={oneDark}
+          extensions={[css()]}
+          onChange={(value) => {
+            handleChangeCssCode(value);
+          }}
+        />
+        {error && <p style={{ color: 'red', marginTop: 8 }}>{error}</p>}
+      </Panel>
+
+        {!error && (
+            <Box style={{ margin: "20px 0 0 0" }}>
+                <Button
+                variant="primary"
+                onClick={handleSaveData}
+                isLoading={saveButtonLoading}
+                >
+                <AddIcon /> Save
                 </Button>
             </Box>
-
-
-        </Panel>
-    );
+        )}
+    </Panel>
+  );
 };
 
 export default Settings;
