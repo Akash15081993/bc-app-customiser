@@ -1,0 +1,16 @@
+body{
+  margin: 0 !important;
+  padding: 20px 0 !important;
+  background:#E4E9EC !important;
+  box-sizing: border-box;
+}
+
+html, *{
+  box-sizing: border-box;
+}
+
+
+h1{
+  color: #20282C;
+  line-height: auto;
+}

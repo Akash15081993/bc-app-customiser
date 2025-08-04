@@ -13,14 +13,13 @@ const InnerHeader = () => {
     const handleBackClick = () => router.push(TabRoutes[TabIds.PRODUCTS]);
 
     return (
-        <Box marginBottom="xxLarge">
+        <Box marginBottom="xxLarge" style={{background:"#fff","padding":"10px", borderRadius : "0.25rem", boxShadow:"0px 1px 6px rgba(49,52,64,0.2)"}}>
             <Button iconLeft={<ArrowBackIcon color="secondary50" />} variant="subtle" onClick={handleBackClick}>
                 <Text bold color="secondary50">Products</Text>
             </Button>
             {name &&
                 <H1>{name}</H1>
             }
-            <HR color="secondary30" />
         </Box>
     );
 };

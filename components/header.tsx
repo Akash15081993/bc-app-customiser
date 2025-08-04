@@ -62,7 +62,7 @@ const Header = () => {
     // });
 
     const items = [
-        { ariaControls: 'home', id: TabIds.HOME, title: 'Home' },
+        { ariaControls: 'home', id: TabIds.HOME, title: 'Dashborad' },
         { ariaControls: 'products', id: TabIds.PRODUCTS, title: 'Products' },
         { ariaControls: 'settings', id: TabIds.SETTINGS, title: 'Settings' },
     ];
@@ -76,7 +76,7 @@ const Header = () => {
     if (headerType === HeaderTypes.INNER) return <InnerHeader />;
 
     return (
-        <Box marginBottom="xxLarge">
+        <Box marginBottom="xxLarge" style={{background:"#fff","padding":"10px", borderRadius : "0.25rem", boxShadow:"0px 1px 6px rgba(49,52,64,0.2)"}}>
             <Tabs
                 activeTab={activeTab}
                 items={items}

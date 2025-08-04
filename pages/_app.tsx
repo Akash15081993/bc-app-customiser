@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app';
 import { ThemeProvider } from 'styled-components';
 import Header from '../components/header';
 import SessionProvider from '../context/session';
+import "../assets/css/global.css"
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
     return (
@@ -12,6 +13,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
             <Box
                 marginHorizontal={{ mobile: 'none', tablet: 'xxxLarge' }}
                 marginVertical={{ mobile: 'none', tablet: "xxLarge" }}
+                style={{maxWidth:'1280px', margin:"0 auto", padding:"0 15px"}}
             >
                 <Header />
                 <SessionProvider>

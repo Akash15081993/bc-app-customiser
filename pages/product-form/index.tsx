@@ -99,7 +99,7 @@ const ProductForm = () => {
 
   const renderImage = (images: any[] = []) => {
     const thumbnail = images.find((img) => img?.is_thumbnail)?.url_thumbnail;
-    const fallback = "/coming-soon-img.gif";
+    const fallback = "/assets/coming-soon-img.gif";
     return (
       <img
         src={thumbnail || fallback}

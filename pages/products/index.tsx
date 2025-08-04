@@ -85,7 +85,7 @@ const Products = () => {
 
     const renderImage = (images) => {
         const thumbnail = images;
-        const fallback = "/coming-soon-img.gif";
+        const fallback = "/assets/coming-soon-img.gif";
         return (
         <img
             src={thumbnail || fallback}
@@ -157,13 +157,11 @@ const Products = () => {
             )}
 
             { !pageLoading && currentItems?.length == 0 && (
-                <Panel>
-                    <Flex justifyContent="center">
-                        <FlexItem>You have no any product for design. Kindly include a new product in the design.</FlexItem>
-                    </Flex>
-                </Panel>
+                <Flex justifyContent="center" style={{padding:'40px 0'}}>
+                    <FlexItem>You have no any product for design. Kindly include a new product in the design.</FlexItem>
+                </Flex>
             )}
-
+            
             {pageLoading && <Loading />}
 
         </Panel>
