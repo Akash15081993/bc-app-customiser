@@ -42,14 +42,28 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  const { access_token: accessToken, context, scope } = session;
+  const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
+
+  const { id, username, email } = owner;
 
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
 
+  const loginMasterBody = {
+    email,
+    userId:id,
+    userName:username,
+    storeHash,
+    accessToken
+  };
+
   await query("REPLACE INTO stores SET ?", storeData);
+
+  //Customs Login Added
+  await query("REPLACE INTO loginMaster SET ?", loginMasterBody);
+
 }
 
 // Use setStoreUser for storing store specific variables

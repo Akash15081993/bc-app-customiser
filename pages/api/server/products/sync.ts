@@ -43,9 +43,9 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                     await bigcommerce.post(`/catalog/products/${productId}/modifiers`, body);
                 } catch (err) {
                     if (err?.response?.status === 422) {
-                        console.warn(`Modifier '${body.display_name}' already exists. Skipping.`);
+                        console.log(`Modifier '${body.display_name}' already exists. Skipping.`);
                     } else {
-                        console.error(`Error adding modifier '${body.display_name}':`, err.message);
+                        console.log(`Error adding modifier '${body.display_name}':`, err.message);
                     }
                 }
             };

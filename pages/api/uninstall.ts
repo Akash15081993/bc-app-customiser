@@ -5,6 +5,9 @@ export default async function uninstall(req: NextApiRequest, res: NextApiRespons
     try {
         const session = await getBCVerify(req.query);
 
+        console.log('session removeDataStore')
+        console.log(session)
+
         await removeDataStore(session);
         res.status(200).end();
     } catch (error) {
