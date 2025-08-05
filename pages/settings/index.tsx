@@ -12,7 +12,8 @@ import { css } from "@codemirror/lang-css";
 import Loading from "@components/loading";
 import ReactCodeMirror, { oneDark } from "@uiw/react-codemirror";
 import { useSession } from "context/session";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 const MAX_LENGTH = 5000;
 
@@ -20,12 +21,40 @@ const Settings = () => {
   const encodedContext = useSession()?.context;
   const [enableShare, setEnableShare] = useState(false);
   const [designerButton, setDesignerButton] = useState("");
-  const initialCss = `.my-custom-css{color:red;}`;
+  const initialCss = `.example-css-custom{color:red;}`;
   const [cssCode, setCssCode] = useState(initialCss);
-  const [saveButtonLoading, setSaveButtonLoading] = useState(false);
+  const [saveButtonLoading, setSaveButtonLoading] = useState(true);
+  const router = useRouter();
 
   const [pageSuccess, setPageSuccess] = useState("");
   const [pageError, setPageError] = useState("");
+  const [error, setError] = useState('');
+
+  const getSettings = async () => {
+    if(encodedContext == "") {
+      router.push('unthorization-error')
+      setSaveButtonLoading(false);
+      return;
+    }
+    const reqSettings = await fetch(`/api/server/settings/get?context=${encodedContext}`,{
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: null,
+      }
+    );
+    const resultSettings = await reqSettings.json();
+    if(resultSettings?.status == true){
+      setEnableShare(resultSettings?.data?.enableShare)
+      setDesignerButton(resultSettings?.data?.designerButton)
+      setCssCode(resultSettings?.data?.cssCode)
+    }
+    setSaveButtonLoading(false)
+
+  }
+
+  useEffect( ()=>{
+    getSettings();
+  },[encodedContext]);
 
   const handleChange = () => setEnableShare(!enableShare);
 
@@ -75,8 +104,6 @@ const Settings = () => {
 
     return ''; // No error
   };
-
-  const [error, setError] = useState('');
 
   const handleChangeCssCode = (value: string) => {
     const validationError = validateCss(value);

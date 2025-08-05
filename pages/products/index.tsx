@@ -14,7 +14,6 @@ const Products = () => {
     const [pageError, setPageError] = useState('');
     const [pageRender, setPageRender] = useState(false);
 
-
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPageOptions] = useState([15, 35, 50, 80]);
     const [itemsPerPage, setItemsPerPage] = useState(15);
@@ -42,6 +41,11 @@ const Products = () => {
         console.log("%c init getProduct", "background: #79d000; color: #1d1d1d;padding:5px; border-radius:5px");
         setpageLoading(true);
         setPageError('')
+
+        if(encodedContext == "") {
+            router.push('unthorization-error')
+            return;
+        }
 
         try {
             
@@ -75,12 +79,12 @@ const Products = () => {
 
     };
 
+    // useEffect(() => {
+    // if (encodedContext) { getProduct(); }else{ setpageLoading(false); }
+    // }, [encodedContext, pageRender]);
+
     useEffect(() => {
-    if (encodedContext) {
         getProduct();
-    }else{
-        setpageLoading(false);
-    }
     }, [encodedContext, pageRender]);
 
     const renderImage = (images) => {

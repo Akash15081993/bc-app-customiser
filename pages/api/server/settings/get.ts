@@ -14,23 +14,10 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
             if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-            const sanitizeCss = (css: any) => {
-                // Remove dangerous keywords
-                css = css.replace(/(expression\(|javascript:|@import|)/gi, '');
-                // Trim & truncate
-                css = css.trim().substring(0, 5000);
-                return css;
-            }
-
-            //First Delete appSettings
-            await mysqlQuery('DELETE FROM appSettings WHERE storeHash = ?',[storeHash]);
-            
-            //After add again
-            const safeCss = sanitizeCss(cssCode);
-            const settingsBody = { storeHash, userId:user?.id, enableShare, designerButton,cssCode:safeCss };
-            await mysqlQuery('REPLACE INTO appSettings SET ?', settingsBody);
-
-            res.status(200).json({ status: true, message: "Success." });
+            //GET Settings
+            const appSettings = await mysqlQuery('SELECT  `enableShare`, `designerButton`, `cssCode` FROM `appSettings` WHERE `storeHash` = ?',[storeHash]);
+            const settings = appSettings[0] || null;
+            res.status(200).json({ status: true, message: "Success.", data: settings });
 
         } catch (error) {
             console.error('DB Error:', error);

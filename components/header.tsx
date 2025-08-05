@@ -2,6 +2,7 @@ import { Box, Tabs } from '@bigcommerce/big-design';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import InnerHeader from './innerHeader';
+import { useSession } from 'context/session';
 
 export const TabIds = {
     HOME: 'home',
@@ -16,15 +17,11 @@ export const TabRoutes = {
 };
 
 const HeaderlessRoutes = [
-    '/orders/[orderId]',
-    '/orders/[orderId]/labels',
-    '/orders/[orderId]/modal',
     '/productAppExtension/[productId]',
 ];
 
 const InnerRoutes = [
-    '/product-form',
-    '/products/[pid]',
+    '/product-form'
 ];
 
 const HeaderTypes = {
@@ -38,8 +35,9 @@ const Header = () => {
     const [headerType, setHeaderType] = useState<string>(HeaderTypes.GLOBAL);
     const router = useRouter();
     const { pathname } = router;
-
+    
     useEffect(() => {
+        
         if (InnerRoutes.includes(pathname)) {
             // Use InnerHeader if route matches inner routes
             setHeaderType(HeaderTypes.INNER);
@@ -55,11 +53,6 @@ const Header = () => {
         }
 
     }, [pathname]);
-
-    // useEffect(() => {
-    //     // Prefetch products page to reduce latency (doesn't prefetch in dev)
-    //     //router.prefetch('/products');
-    // });
 
     const items = [
         { ariaControls: 'home', id: TabIds.HOME, title: 'Dashborad' },

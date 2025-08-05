@@ -12,6 +12,7 @@ import Loading from "@components/loading";
 import SwitchDesigner from "@components/products/switchDesigner";
 import { StringKeyValue } from "@types";
 import { useSession } from "context/session";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 const FormErrors = {
@@ -35,6 +36,8 @@ const ProductForm = () => {
   
   const [pageRender, setPageRender] = useState(false);
 
+  const router = useRouter();
+
   const [paginationData, setPaginationData] = useState({
     total: 0,
     current_page: 1,
@@ -43,6 +46,12 @@ const ProductForm = () => {
 
   const searchProduct = async (page = 1, perPage = itemsPerPage) => {
     console.log('Init searchProduct')
+
+    if(encodedContext == "") {
+      router.push('unthorization-error')
+      return;
+    }
+
     setSerachButtonLoading(true);
     setpageLoading(false)
     const res = await fetch(`/api/server/products/search?context=${encodedContext}`, {
