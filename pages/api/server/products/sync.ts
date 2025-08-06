@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { mysqlQuery } from '@lib/dbs/mysql';
 import { bigcommerceClient, getSession } from '@lib/auth';
+import { mysqlQuery } from '@lib/dbs/mysql';
 import languageEN from 'lang/en';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
@@ -27,7 +27,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
             const renderImage = (images) => {
                 const thumbnail = images.find((img) => img?.is_thumbnail)?.url_thumbnail;
-                return thumbnail || null;
+                
+return thumbnail || null;
             }
 
             const productData = product?.data;
@@ -43,9 +44,9 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                     await bigcommerce.post(`/catalog/products/${productId}/modifiers`, body);
                 } catch (err) {
                     if (err?.response?.status === 422) {
-                        console.log(`Modifier '${body.display_name}' already exists. Skipping.`);
+                        console.warn(`Modifier '${body.display_name}' already exists. Skipping.`);
                     } else {
-                        console.log(`Error adding modifier '${body.display_name}':`, err.message);
+                        console.error(`Error adding modifier '${body.display_name}':`, err.message);
                     }
                 }
             };
@@ -65,7 +66,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                     sort_order: order,
                     type: type || modifierOptions.type
                     };
-                    return tryCreateModifier(optionBody);
+                    
+return tryCreateModifier(optionBody);
                 })
             );
 

@@ -1,6 +1,6 @@
 import { Flex, FlexItem, Switch } from "@bigcommerce/big-design";
-import languageEN from "lang/en";
 import { useState } from "react";
+import languageEN from "lang/en";
 
 const SwitchDesigner = (props) => {
 

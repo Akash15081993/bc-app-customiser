@@ -1,6 +1,5 @@
-import { Button, Dropdown, Flex, FlexItem, Switch } from "@bigcommerce/big-design";
+import { Button, Dropdown, Flex, FlexItem } from "@bigcommerce/big-design";
 import { MoreHorizIcon } from "@bigcommerce/big-design-icons";
-import { useState } from "react";
 
 const ProductActionDropdown = (props) => {
 

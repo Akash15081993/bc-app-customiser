@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { mysqlQuery } from '@lib/dbs/mysql';
 import { bigcommerceClient, getSession } from '@lib/auth';
+import { mysqlQuery } from '@lib/dbs/mysql';
 import languageEN from 'lang/en';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
@@ -22,12 +22,13 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
             const { modifierDisplayNames } = languageEN;
 
-            const fetchFilteredModifierIds = async (productId: number, limit: number = 50) => {
+            const fetchFilteredModifierIds = async (productId: number, limit = 50) => {
                 let page = 1;
-                let matchingModifierIds: number[] = [];
+                const matchingModifierIds: number[] = [];
                 const targetDisplayNames = [ modifierDisplayNames.designId, modifierDisplayNames.viewDesign, modifierDisplayNames.designArea ];
 
-                while (true) {
+                let hasMorePages = true;
+                while (hasMorePages) {
                     const response = await bigcommerce.get(`/catalog/products/${productId}/modifiers?limit=${limit}&page=${page}`);
                     const { data, meta } = response;
 
@@ -39,6 +40,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                     matchingModifierIds.push(...matching);
 
                     const { current_page, total_pages } = meta.pagination;
+                    hasMorePages = current_page < total_pages;
 
                     if (current_page >= total_pages) break;
                     page++;

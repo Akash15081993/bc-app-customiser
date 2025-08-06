@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { mysqlQuery } from '@lib/dbs/mysql';
 import { getSession } from '@lib/auth';
+import { mysqlQuery } from '@lib/dbs/mysql';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -9,7 +9,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
         try {
 
-            const { enableShare, designerButton, cssCode } = req?.body;
+            const { enableShare, designerButton, cssCode } = req.body;
             const { storeHash, user} = await getSession(req);
 
             if (!user) return res.status(401).json({ error: 'Unauthorized' });
@@ -19,7 +19,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
                 css = css.replace(/(expression\(|javascript:|@import|)/gi, '');
                 // Trim & truncate
                 css = css.trim().substring(0, 5000);
-                return css;
+                
+return css;
             }
 
             //First Delete appSettings

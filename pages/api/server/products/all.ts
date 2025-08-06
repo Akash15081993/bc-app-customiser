@@ -1,15 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { mysqlQuery } from "@lib/dbs/mysql";
 import { getSession } from "@lib/auth";
+import { mysqlQuery } from "@lib/dbs/mysql";
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
   try {
-    if (req.method === 'GET') return res.status(405).json({ status: false, error: 'Method not allowed' });
+    if (req.method === 'GET') {
+      return res.status(405).json({ status: false, error: 'Method not allowed' });
+    }
     try {
       const { storeHash, user } = await getSession(req);
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-      const { page, limit } = req?.body;
+      const { page, limit } = req.body;
       const offset = (page - 1) * limit;
 
       const [items, totalResult]: any = await Promise.all([

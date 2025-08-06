@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { mysqlQuery } from '@lib/dbs/mysql';
 import { getSession } from '@lib/auth';
+import { mysqlQuery } from '@lib/dbs/mysql';
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -8,10 +8,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         if (req.method === 'GET') return res.status(405).json({ status: false, message: 'Method not allowed' });
 
         try {
-
-            const { enableShare, designerButton, cssCode } = req?.body;
             const { storeHash, user} = await getSession(req);
-
             if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
             //GET Settings

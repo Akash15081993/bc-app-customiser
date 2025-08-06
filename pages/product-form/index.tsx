@@ -8,12 +8,12 @@ import {
   Panel,
   Table,
 } from "@bigcommerce/big-design";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
 import Loading from "@components/loading";
 import SwitchDesigner from "@components/products/switchDesigner";
 import { StringKeyValue } from "@types";
 import { useSession } from "context/session";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 
 const FormErrors = {
   name: "Product name is required",
@@ -30,10 +30,10 @@ const ProductForm = () => {
   const [pageLoading, setpageLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPageOptions] = useState([10,5]);
+  const [itemsPerPageOptions] = useState([10, 5]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentItems, setCurrentItems] = useState<[]>([]);
-  
+
   const [pageRender, setPageRender] = useState(false);
 
   const router = useRouter();
@@ -44,24 +44,27 @@ const ProductForm = () => {
     per_page: 5,
   });
 
-  const searchProduct = async (page = 1, perPage = itemsPerPage) => {
-    console.log('Init searchProduct')
-
-    if(encodedContext == "") {
-      router.push('unthorization-error')
-      return;
+  const searchProduct = useCallback(async (page = currentPage, perPage = itemsPerPage) => {
+    if (encodedContext === "") {
+      router.push("unthorization-error");
+      
+return;
     }
 
     setSerachButtonLoading(true);
-    setpageLoading(false)
-    const res = await fetch(`/api/server/products/search?context=${encodedContext}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ keyword: searchTerm, page, limit: perPage }),
-    });
+    setpageLoading(false);
+
+    const res = await fetch(
+      `/api/server/products/search?context=${encodedContext}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: searchTerm, page, limit: perPage }),
+      }
+    );
 
     const productRes = await res.json();
-    if(productRes?.message) {
+    if (productRes?.message) {
       setPageError(productRes?.message);
     }
 
@@ -69,7 +72,6 @@ const ProductForm = () => {
     const pagination = productRes?.meta?.pagination;
 
     setCurrentItems(products);
-
     setPaginationData({
       total: pagination?.total,
       current_page: pagination?.current_page,
@@ -77,11 +79,13 @@ const ProductForm = () => {
     });
 
     setSerachButtonLoading(false);
-  };
+  }, [encodedContext, router, searchTerm, currentPage, itemsPerPage]);
+
 
   const handleSearch = async () => {
     if (searchTerm === "") {
       setErrors({ name: FormErrors.name });
+
       return;
     }
     setCurrentPage(1);
@@ -97,7 +101,7 @@ const ProductForm = () => {
   const onPageChange = (page) => {
     setCurrentPage(page);
     searchProduct(page, itemsPerPage);
-    setPageSuccess('')
+    setPageSuccess("");
   };
 
   const onItemsPerPageChange = (perPage) => {
@@ -109,29 +113,23 @@ const ProductForm = () => {
   const renderImage = (images: any[] = []) => {
     const thumbnail = images.find((img) => img?.is_thumbnail)?.url_thumbnail;
     const fallback = "/assets/coming-soon-img.gif";
+
     return (
-      <img
-        src={thumbnail || fallback}
-        width={40}
-        height={40}
-        alt="Product"
-      />
+      <img src={thumbnail || fallback} width={40} height={40} alt="Product" />
     );
   };
 
   const renderImageDefaultImage = (images: any[] = []) => {
     const thumbnail = images.find((img) => img?.is_thumbnail)?.url_thumbnail;
+
     return thumbnail || null;
   };
 
   useEffect(() => {
     if (searchTerm) {
-      searchProduct(currentPage, itemsPerPage);
+      searchProduct();
     }
-  //}, [currentPage, itemsPerPage, pageRender]);
-  }, [pageRender]);
-
-  //if (pageLoading) return <Loading />;
+  }, [pageRender, searchProduct, searchTerm]);
 
   return (
     <>
@@ -140,7 +138,7 @@ const ProductForm = () => {
           <Message
             marginVertical="medium"
             messages={[{ text: pageError }]}
-            onClose={() => setPageError('')}
+            onClose={() => setPageError("")}
             type="error"
           />
         )}
@@ -177,15 +175,17 @@ const ProductForm = () => {
           header={pageSuccess.split("|@|")[0]}
           marginVertical="medium"
           messages={[{ text: pageSuccess.split("|@|")[1] }]}
-          onClose={() => setPageSuccess('')}
+          onClose={() => setPageSuccess("")}
           type="success"
         />
       )}
 
       {!pageLoading && currentItems?.length > 0 && (
         <Panel>
-          <h4 className="success50" style={{marginTop:"0"}}>Results for '{searchTerm}'</h4>
-          
+          <h4 className="success50" style={{ marginTop: "0" }}>
+            Results for <b>{searchTerm}</b>
+          </h4>
+
           <Table
             columns={[
               {
@@ -195,7 +195,11 @@ const ProductForm = () => {
                 width: "80",
               },
               { header: "Name", hash: "name", render: ({ name }) => name },
-              { header: "SKU", hash: "sku", render: ({ sku }) => sku ? sku : "-" },
+              {
+                header: "SKU",
+                hash: "sku",
+                render: ({ sku }) => (sku ? sku : "-"),
+              },
               {
                 header: "Designer",
                 hash: "designer",
@@ -208,10 +212,10 @@ const ProductForm = () => {
                       pageRender: setPageRender,
                       productId: id,
                       productSku: sku ? sku : "-",
-                      productName:name,
+                      productName: name,
                       modifiers,
-                      jwtToken:encodedContext,
-                      defaultImage:renderImageDefaultImage(images)
+                      jwtToken: encodedContext,
+                      defaultImage: renderImageDefaultImage(images),
                     }}
                   />
                 ),
@@ -235,10 +239,10 @@ const ProductForm = () => {
         </Panel>
       )}
 
-      { currentItems?.length == 0 && (
+      {currentItems?.length == 0 && (
         <Panel>
           <Flex justifyContent="center">
-              <FlexItem>No Data</FlexItem>
+            <FlexItem>No Data</FlexItem>
           </Flex>
         </Panel>
       )}

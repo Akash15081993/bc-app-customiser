@@ -1,4 +1,4 @@
-import { Box, Button, H1, HR, Text } from '@bigcommerce/big-design';
+import { Box, Button, H1, Text } from '@bigcommerce/big-design';
 import { ArrowBackIcon } from '@bigcommerce/big-design-icons';
 import { useRouter } from 'next/router';
 import { useProductList } from '../lib/hooks';

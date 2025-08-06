@@ -20,12 +20,10 @@ const MYSQL_CONFIG: PoolOptions = {
 //const dbUrl = process.env.DATABASE_URL;
 // const pool = dbUrl ? mysql.createPool(dbUrl) : mysql.createPool(MYSQL_CONFIG);
 
-let pool: mysql.Pool;
-
 if (!global.mysqlPool) {
   global.mysqlPool = mysql.createPool(MYSQL_CONFIG);
 }
-pool = global.mysqlPool;
+const pool: mysql.Pool = global.mysqlPool;
 
 const query = promisify(pool.query.bind(pool));
 

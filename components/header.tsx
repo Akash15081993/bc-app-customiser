@@ -1,8 +1,8 @@
-import { Box, Tabs } from '@bigcommerce/big-design';
+import { Tabs } from '@bigcommerce/big-design';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import InnerHeader from './innerHeader';
-import { useSession } from 'context/session';
+
 
 export const TabIds = {
     HOME: 'home',
@@ -62,7 +62,8 @@ const Header = () => {
 
     const handleTabClick = (tabId: string) => {
         setActiveTab(tabId);
-        return router.push(TabRoutes[tabId]);
+        
+return router.push(TabRoutes[tabId]);
     };
 
     if (headerType === HeaderTypes.HEADERLESS) return null;

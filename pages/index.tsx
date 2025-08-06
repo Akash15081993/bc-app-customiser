@@ -1,4 +1,3 @@
-import { Flex, Grid, GridItem, H4, Panel } from '@bigcommerce/big-design';
 import stylesPage  from '../assets/css/dashboard.module.css';
 
 const Index = () => {
@@ -28,7 +27,7 @@ const Index = () => {
             <div className={stylesPage.contact_info}>
                 <h2>KDS Customizer</h2>
                 <p>
-                    A variety of packages are offered. Please contact your "KDS Customizer" Account Manager or <br /> <a href='mailto:info@kds-customizer.com'>info@kds-customizer.com</a> for more information
+                    A variety of packages are offered. Please contact your <b>KDS Customizer</b> Account Manager or <br /> <a href="mailto:info@kds-customizer.com">info@kds-customizer.com</a> for more information
                 </p>
             </div>
 
