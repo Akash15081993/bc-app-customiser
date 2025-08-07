@@ -43,7 +43,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     } catch (error) {
-      const { message, response } = error;
+      const { message } = error;
       console.error("DB Error:", error);
       res.status(500).json({ status: false, message: message+".." });
     }
