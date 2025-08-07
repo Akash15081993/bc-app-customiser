@@ -9,7 +9,7 @@ import {
   Table,
 } from "@bigcommerce/big-design";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "@components/loading";
 import SwitchDesigner from "@components/products/switchDesigner";
 import { StringKeyValue } from "@types";
@@ -44,16 +44,15 @@ const ProductForm = () => {
     per_page: 5,
   });
 
-  const searchProduct = useCallback(async (page = currentPage, perPage = itemsPerPage) => {
-    if (encodedContext === "") {
+  const searchProduct = async (page = 1, perPage = itemsPerPage) => {
+    if (encodedContext == "") {
       router.push("unthorization-error");
-      
-return;
+
+      return;
     }
 
     setSerachButtonLoading(true);
     setpageLoading(false);
-
     const res = await fetch(
       `/api/server/products/search?context=${encodedContext}`,
       {
@@ -72,6 +71,7 @@ return;
     const pagination = productRes?.meta?.pagination;
 
     setCurrentItems(products);
+
     setPaginationData({
       total: pagination?.total,
       current_page: pagination?.current_page,
@@ -79,8 +79,7 @@ return;
     });
 
     setSerachButtonLoading(false);
-  }, [encodedContext, router, searchTerm, currentPage, itemsPerPage]);
-
+  };
 
   const handleSearch = async () => {
     if (searchTerm === "") {
@@ -127,9 +126,12 @@ return;
 
   useEffect(() => {
     if (searchTerm) {
-      searchProduct();
+      searchProduct(currentPage, itemsPerPage);
     }
-  }, [pageRender, searchProduct, searchTerm]);
+    //}, [currentPage, itemsPerPage, pageRender]);
+  }, [pageRender]);
+
+  //if (pageLoading) return <Loading />;
 
   return (
     <>

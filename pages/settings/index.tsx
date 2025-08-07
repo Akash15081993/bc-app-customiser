@@ -11,7 +11,7 @@ import { AddIcon, AssignmentIcon } from "@bigcommerce/big-design-icons";
 import { css } from "@codemirror/lang-css";
 import ReactCodeMirror, { oneDark } from "@uiw/react-codemirror";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "@components/loading";
 import { useSession } from "context/session";
 
@@ -30,33 +30,32 @@ const Settings = () => {
   const [pageError, setPageError] = useState("");
   const [error, setError] = useState('');
 
-  const getSettings = useCallback(async () => {
-  if (encodedContext === "") {
-    router.push("unthorization-error");
-    setSaveButtonLoading(false);
-    
+  const getSettings = async () => {
+    if(encodedContext == "") {
+      router.push('unthorization-error')
+      setSaveButtonLoading(false);
+      
 return;
+    }
+    const reqSettings = await fetch(`/api/server/settings/get?context=${encodedContext}`,{
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: null,
+      }
+    );
+    const resultSettings = await reqSettings.json();
+    if(resultSettings?.status == true && resultSettings?.data != null){
+      setEnableShare(resultSettings?.data?.enableShare)
+      setDesignerButton(resultSettings?.data?.designerButton)
+      setCssCode(resultSettings?.data?.cssCode)
+    }
+    setSaveButtonLoading(false)
+
   }
 
-  const reqSettings = await fetch(`/api/server/settings/get?context=${encodedContext}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-
-  const resultSettings = await reqSettings.json();
-
-  if (resultSettings?.status === true) {
-    setEnableShare(resultSettings.data.enableShare);
-    setDesignerButton(resultSettings.data.designerButton);
-    setCssCode(resultSettings.data.cssCode);
-  }
-
-  setSaveButtonLoading(false);
-}, [encodedContext, router]);
-
-  useEffect(() => {
+  useEffect( ()=>{
     getSettings();
-  }, [getSettings]);
+  },[encodedContext]);
 
   const handleChange = () => setEnableShare(!enableShare);
 

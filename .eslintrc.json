@@ -28,13 +28,13 @@
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": ["error", { "ignoreRestSiblings": true }],
     "@typescript-eslint/no-use-before-define": "off",
-    "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "no-console": ["error", { "allow": ["warn", "error"] }],
     "react/display-name": "off",
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
-    "newline-before-return": "error",
+    "react-hooks/exhaustive-deps": "warn", //my custom
+    "newline-before-return": "warn", //my custom - error
     "sort-imports": [
       "error",
       {
