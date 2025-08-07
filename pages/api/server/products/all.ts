@@ -43,12 +43,9 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     } catch (error) {
-
-      console.warn('All.ts catch')
-      console.warn(JSON.stringify(error))
-
+      const { message, response } = error;
       console.error("DB Error:", error);
-      res.status(500).json({ status: false, message: "Internal server error" });
+      res.status(500).json({ status: false, message: message+".." });
     }
 
     //res.status(200).json({message:"Success"});

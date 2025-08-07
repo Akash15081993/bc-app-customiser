@@ -13,6 +13,13 @@ const MYSQL_CONFIG: PoolOptions = {
   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
 };
 
+console.warn('🔍 DB ENV', {
+  host: process.env.MYSQL_HOST,
+  database: process.env.MYSQL_DATABASE,
+  user: process.env.MYSQL_USERNAME,
+  hasPassword: !!process.env.MYSQL_PASSWORD,
+});
+
 // For use with DB URLs
 // Other mysql: https://www.npmjs.com/package/mysql#pooling-connections
 

@@ -76,8 +76,7 @@ export function setSession(session: SessionProps) {
 export async function getSession(req: NextApiRequest, res?) {
    const rawContext = req.query.context || getCookie('store_context', { req, res });
 
-   console.warn('rawContext')
-   console.warn(rawContext)
+   console.warn('rawContext auth.ts => '+rawContext)
 
   if (!rawContext || typeof rawContext !== 'string') {
     throw new Error('Missing context');
@@ -85,12 +84,17 @@ export async function getSession(req: NextApiRequest, res?) {
 
   const { context: storeHash, user } = decodePayload(rawContext) as SessionProps;
 
+  console.warn('storeHash auth.ts => '+ storeHash)
+  console.warn('storeHash auth.ts => '+ JSON.stringify(user))
+
   const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
   if (!hasUser) {
     throw new Error('Unauthorized user');
   }
 
   const accessToken = await db.getStoreToken(storeHash);
+  
+  console.warn('accessToken auth.ts => '+ accessToken)
 
   return { storeHash, user, accessToken };
 }
