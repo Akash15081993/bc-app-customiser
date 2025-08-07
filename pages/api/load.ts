@@ -14,6 +14,9 @@ export default async function load(req: NextApiRequest, res: NextApiResponse) {
         const session = await getBCVerify(req.query);
         const encodedContext = encodePayload(session); // Signed JWT to validate/ prevent tampering
 
+        console.warn('Load.ts session')
+        console.warn(session)
+
         await setSession(session);
         res.redirect(302, buildRedirectUrl(session.url, encodedContext));
     } catch (error) {

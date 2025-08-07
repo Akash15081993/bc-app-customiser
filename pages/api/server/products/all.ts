@@ -9,6 +9,10 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     }
     try {
       const { storeHash, user } = await getSession(req);
+
+      console.warn('All.ts session')
+      console.warn(user)
+
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 
       const { page, limit } = req.body;
@@ -39,6 +43,10 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     } catch (error) {
+
+      console.warn('All.ts catch')
+      console.warn(JSON.stringify(error))
+
       console.error("DB Error:", error);
       res.status(500).json({ status: false, message: "Internal server error" });
     }

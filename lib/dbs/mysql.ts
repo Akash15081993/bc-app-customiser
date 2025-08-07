@@ -20,9 +20,20 @@ const MYSQL_CONFIG: PoolOptions = {
 //const dbUrl = process.env.DATABASE_URL;
 // const pool = dbUrl ? mysql.createPool(dbUrl) : mysql.createPool(MYSQL_CONFIG);
 
+// Create and share global pool
 if (!global.mysqlPool) {
   global.mysqlPool = mysql.createPool(MYSQL_CONFIG);
+  // Optional: test connection immediately
+  global.mysqlPool.getConnection((err, connection) => {
+    if (err) {
+      console.error('[MySQL] ❌ Connection failed:', err.message);
+    } else {
+      console.warn('[MySQL] ✅ Connection successful');
+      connection.release();
+    }
+  });
 }
+
 const pool: mysql.Pool = global.mysqlPool;
 
 const query = promisify(pool.query.bind(pool));
