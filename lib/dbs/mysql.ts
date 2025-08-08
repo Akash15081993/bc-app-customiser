@@ -91,6 +91,7 @@ export async function setStoreUser(session: SessionProps) {
     sub,
     user: { id: userId },
   } = session;
+
   if (!userId) return null;
 
   const contextString = context ?? sub;
@@ -98,6 +99,9 @@ export async function setStoreUser(session: SessionProps) {
   const sql = "SELECT * FROM storeUsers WHERE userId = ? AND storeHash = ?";
   const values = [String(userId), storeHash];
   const storeUser = await query(sql, values);
+
+  console.warn('storeUser')
+  console.warn(storeUser)
 
   // Set admin (store owner) if installing/ updating the app
   // https://developer.bigcommerce.com/api-docs/apps/guide/users
@@ -131,6 +135,7 @@ export async function deleteUser({ context, user, sub }: SessionProps) {
   const contextString = context ?? sub;
   const storeHash = contextString?.split("/")[1] || "";
   const values = [String(user?.id), storeHash];
+  console.warn('deleteUser RUN')
   await query(
     "DELETE FROM storeUsers WHERE userId = ? AND storeHash = ?",
     values
