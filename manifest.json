@@ -1,0 +1,58 @@
+{
+  "name": "My Pro App",
+  "single_click_install": true,
+  "auth_callback": "https://bc-app-customiser.vercel.app/api/auth/callback",
+  "load_callback": "https://bc-app-customiser.vercel.app",
+  "uninstall_callback": "https://bc-app-customiser.vercel.app/api/uninstall",
+  "homepage_url": "https://bc-app-customiser.vercel.app/",
+  "support_email": "support@yourapp.com",
+  "icon": "https://bc-app-customiser.vercel.app/assets/app-logo.png",
+  "oauth2": {
+    "client_id": "t9nwcq6cdph70thlx09v3al3drromvi",
+    "client_secret": "da02c059345f51ae3977a66866c4918bd00b814749f3f8c62c72a27d6f192570",
+    "authorize_url": "https://login.bigcommerce.com/oauth2/authorize",
+    "access_token_url": "https://login.bigcommerce.com/oauth2/token",
+    "scopes": [
+      "store_v2_default",
+      "store_customer_read_only",
+      "store_cart_read_only",
+      "store_product_read_only",
+      "store_content_read_only",
+      "store_order_read_only",
+      "store_settings_read_only"
+    ],
+    "redirect_uris": [
+      "https://bc-app-customiser.vercel.app/api/auth/callback"
+    ]
+  },
+  "billing": {
+    "pricing": {
+      "plans": [
+        {
+          "name": "Pro Plan",
+          "id": "pro-plan",
+          "description": "Full access to all features",
+          "price": 499,
+          "currency": "USD",
+          "interval": "month",
+          "trial_days": 0
+        }
+      ],
+      "default": "pro-plan"
+    }
+  },
+  "webhooks": [
+    {
+      "scope": "store/app/subscription/created",
+      "destination": "https://bc-app-customiser.vercel.app/api/webhooks/billing"
+    },
+    {
+      "scope": "store/app/subscription/updated",
+      "destination": "https://bc-app-customiser.vercel.app/api/webhooks/billing"
+    },
+    {
+      "scope": "store/app/subscription/deleted",
+      "destination": "https://bc-app-customiser.vercel.app/api/webhooks/billing"
+    }
+  ]
+}
