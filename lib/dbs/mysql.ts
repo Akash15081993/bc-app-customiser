@@ -13,12 +13,6 @@ const MYSQL_CONFIG: PoolOptions = {
   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
 };
 
-console.warn('🔍 DB ENV', {
-  host: process.env.MYSQL_HOST,
-  database: process.env.MYSQL_DATABASE,
-  user: process.env.MYSQL_USERNAME,
-  hasPassword: !!process.env.MYSQL_PASSWORD,
-});
 
 // For use with DB URLs
 // Other mysql: https://www.npmjs.com/package/mysql#pooling-connections
@@ -100,10 +94,6 @@ export async function setStoreUser(session: SessionProps) {
   const values = [String(userId), storeHash];
   const storeUser = await query(sql, values);
 
-  console.warn('storeUser')
-  console.warn(storeUser)
-  console.warn("userId =>" +userId)
-
   // Set admin (store owner) if installing/ updating the app
   // https://developer.bigcommerce.com/api-docs/apps/guide/users
   if (accessToken) {
@@ -123,9 +113,8 @@ export async function setStoreUser(session: SessionProps) {
 
     //custom code start
     const storeUserIdCustom = userId as number;
-    console.warn("storeUserIdCustom => "+ storeUserIdCustom)
-    if(storeUserIdCustom  > 0 && storeHash !== ""){
-      console.warn("Run my custom code")
+    if(storeUserIdCustom > 0 && storeHash !== ""){
+      console.warn("Run my custom code");
       await query("INSERT INTO storeUsers SET ?", {
         isAdmin: owner.id === userId,
         storeHash,
@@ -150,11 +139,7 @@ export async function deleteUser({ context, user, sub }: SessionProps) {
   const contextString = context ?? sub;
   const storeHash = contextString?.split("/")[1] || "";
   const values = [String(user?.id), storeHash];
-  console.warn('deleteUser RUN')
-  await query(
-    "DELETE FROM storeUsers WHERE userId = ? AND storeHash = ?",
-    values
-  );
+  await query("DELETE FROM storeUsers WHERE userId = ? AND storeHash = ?", values);
 }
 
 export async function hasStoreUser(storeHash: string, userId: string) {

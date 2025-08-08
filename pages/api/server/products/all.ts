@@ -1,4 +1,3 @@
-import { getCookie } from "cookies-next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
@@ -10,14 +9,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     }
     try {
 
-      const checkCoookes = getCookie('store_context', { req, res })
-      console.warn("all.ts checkCoookes => " + checkCoookes)
-
       const { storeHash, user } = await getSession(req);
-      console.warn('All.ts session')
-      console.warn(user)
-      console.warn('All.ts mysqlQuery')
-      console.warn(mysqlQuery)
 
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 

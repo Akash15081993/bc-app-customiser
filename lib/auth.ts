@@ -1,4 +1,3 @@
-import { getCookie } from 'cookies-next';
 import * as jwt from 'jsonwebtoken';
 import { NextApiRequest } from 'next';
 import * as BigCommerce from 'node-bigcommerce';
@@ -53,60 +52,26 @@ export function getBCVerify({ signed_payload_jwt }: QueryParams) {
 }
 
 export function setSession(session: SessionProps) {
-    console.warn('auth.ts setSession')
     db.setUser(session);
     db.setStore(session);
-
-    console.warn('auth.ts setStoreUser start')
     db.setStoreUser(session);
-    console.warn('auth.ts setStoreUser end')
 }
 
-// export async function getSession({ query: { context = '' } }: NextApiRequest) {
-//     if (typeof context !== 'string') return;
-//     const { context: storeHash, user } = decodePayload(context) as SessionProps;
-//     const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
+export async function getSession({ query: { context = '' } }: NextApiRequest) {
+    if (typeof context !== 'string') return;
+    const { context: storeHash, user } = decodePayload(context) as SessionProps;
+    const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
 
-//     // Before retrieving session/ hitting APIs, check user
-//     if (!hasUser) {
-//         throw new Error('User is not available. Please login or ensure you have access permissions.');
-//     }
+    // Before retrieving session/ hitting APIs, check user
+    if (!hasUser) {
+        throw new Error('User is not available. Please login or ensure you have access permissions.');
+    }
 
-//     const accessToken = await db.getStoreToken(storeHash);
+    const accessToken = await db.getStoreToken(storeHash);
 
-//     return { accessToken, storeHash, user };
-// }
-
-export async function getSession(req: NextApiRequest, res?) {
-
-
-    const checkCoookes = getCookie('store_context', { req, res });
-    console.warn("auth.ts checkCoookes => " + checkCoookes)
-
-   const rawContext = req.query.context || getCookie('store_context', { req, res });
-
-   console.warn('rawContext auth.ts => '+rawContext)
-
-  if (!rawContext || typeof rawContext !== 'string') {
-    throw new Error('Missing context');
-  }
-
-  const { context: storeHash, user } = decodePayload(rawContext) as SessionProps;
-
-  console.warn('storeHash auth.ts => '+ storeHash)
-  console.warn('storeHash auth.ts => '+ JSON.stringify(user))
-
-  const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
-  if (!hasUser) {
-    throw new Error('Unauthorized user');
-  }
-
-  const accessToken = await db.getStoreToken(storeHash);
-  
-  console.warn('accessToken auth.ts => '+ accessToken)
-
-  return { storeHash, user, accessToken };
+    return { accessToken, storeHash, user };
 }
+
 
 // JWT functions to sign/ verify 'context' query param from /api/auth||load
 export function encodePayload({ user, owner, ...session }: SessionProps) {

@@ -1,4 +1,3 @@
-import { setCookies } from "cookies-next";
 import stylesPage from "../assets/css/dashboard.module.css";
 
 const Index = () => {
@@ -47,21 +46,5 @@ const Index = () => {
     </div>
   );
 };
-
-export async function getServerSideProps({ req, res, query }) {
-    console.warn('getServerSideProps Init')
-  if (query.context) {
-    console.warn("index.tsx => "+query.context)
-    setCookies('store_context', query.context, {
-    req,
-    res,
-    maxAge: 60 * 60 * 24,
-    secure: true,
-    path: '/'
-    });
-  }
-
-  return { props: {} };
-}
 
 export default Index;
