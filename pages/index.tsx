@@ -51,13 +51,13 @@ const Index = () => {
 export async function getServerSideProps({ req, res, query }) {
     console.warn('getServerSideProps Init')
   if (query.context) {
-    console.warn(query.context)
+    console.warn("index.tsx => "+query.context)
     setCookies('store_context', query.context, {
     req,
     res,
     maxAge: 60 * 60 * 24,
-    sameSite: 'lax',
     secure: true,
+    path: '/'
     });
   }
 

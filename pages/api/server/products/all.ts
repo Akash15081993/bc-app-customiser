@@ -14,9 +14,10 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       console.warn("all.ts checkCoookes => " + checkCoookes)
 
       const { storeHash, user } = await getSession(req);
-
       console.warn('All.ts session')
       console.warn(user)
+      console.warn('All.ts mysqlQuery')
+      console.warn(mysqlQuery)
 
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 
