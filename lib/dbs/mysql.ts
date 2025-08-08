@@ -72,7 +72,10 @@ export async function setStore(session: SessionProps) {
   await query("REPLACE INTO stores SET ?", storeData);
 
   //Customs Login Added
-  await query("REPLACE INTO loginMaster SET ?", loginMasterBody);
+  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  if (!existing) {
+    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
+  }
 
 }
 
