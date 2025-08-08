@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { getCookie } from "cookies-next";
+import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
 
