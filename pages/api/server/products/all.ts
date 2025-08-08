@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { getCookie } from "cookies-next";
 import { getSession } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
-import { getCookie } from "cookies-next";
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
   try {
