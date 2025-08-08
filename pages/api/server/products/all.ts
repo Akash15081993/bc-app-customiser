@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
+import { getCookie } from "cookies-next";
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -8,6 +9,10 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       return res.status(405).json({ status: false, error: 'Method not allowed' });
     }
     try {
+
+      const checkCoookes = getCookie('store_context', { req, res })
+      console.warn("all.ts checkCoookes => " + checkCoookes)
+
       const { storeHash, user } = await getSession(req);
 
       console.warn('All.ts session')

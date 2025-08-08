@@ -74,6 +74,10 @@ export function setSession(session: SessionProps) {
 // }
 
 export async function getSession(req: NextApiRequest, res?) {
+
+    const checkCoookes = getCookie('store_context', { req, res })
+    console.warn("auth.ts checkCoookes => " + checkCoookes)
+
    const rawContext = req.query.context || getCookie('store_context', { req, res });
 
    console.warn('rawContext auth.ts => '+rawContext)
