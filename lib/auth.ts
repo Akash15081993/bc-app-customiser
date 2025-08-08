@@ -53,9 +53,13 @@ export function getBCVerify({ signed_payload_jwt }: QueryParams) {
 }
 
 export function setSession(session: SessionProps) {
+    console.warn('auth.ts setSession')
     db.setUser(session);
     db.setStore(session);
+
+    console.warn('auth.ts setStoreUser start')
     db.setStoreUser(session);
+    console.warn('auth.ts setStoreUser end')
 }
 
 // export async function getSession({ query: { context = '' } }: NextApiRequest) {

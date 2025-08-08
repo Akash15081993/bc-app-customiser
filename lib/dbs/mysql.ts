@@ -102,6 +102,7 @@ export async function setStoreUser(session: SessionProps) {
 
   console.warn('storeUser')
   console.warn(storeUser)
+  console.warn("userId =>" +userId)
 
   // Set admin (store owner) if installing/ updating the app
   // https://developer.bigcommerce.com/api-docs/apps/guide/users
