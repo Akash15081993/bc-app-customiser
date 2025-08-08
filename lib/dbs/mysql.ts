@@ -111,18 +111,6 @@ export async function setStoreUser(session: SessionProps) {
       );
     }
 
-    //custom code start
-    const storeUserIdCustom = userId as number;
-    if(storeUserIdCustom > 0 && storeHash !== ""){
-      console.warn("Run my custom code");
-      await query("INSERT INTO storeUsers SET ?", {
-        isAdmin: owner.id === userId,
-        storeHash,
-        userId,
-      });
-    }
-    //custom code end
-
   } else {
     // Create a new user if it doesn't exist (non-store owners added here for multi-user apps)
     if (!storeUser.length) {
