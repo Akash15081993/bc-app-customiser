@@ -16,8 +16,6 @@ const MYSQL_CONFIG: PoolOptions = {
 
 // For use with DB URLs
 // Other mysql: https://www.npmjs.com/package/mysql#pooling-connections
-
-
 //const dbUrl = process.env.DATABASE_URL;
 // const pool = dbUrl ? mysql.createPool(dbUrl) : mysql.createPool(MYSQL_CONFIG);
 
@@ -27,7 +25,7 @@ if (!global.mysqlPool) {
   // Optional: test connection immediately
   global.mysqlPool.getConnection((err, connection) => {
     if (err) {
-      console.error('[MySQL] ❌ Connection failed:', err.message);
+      console.warn('[MySQL] ❌ Connection failed:', err.message);
     } else {
       console.warn('[MySQL] ✅ Connection successful');
       connection.release();
