@@ -1,8 +1,17 @@
+import { useEffect, useState } from "react";
+import { useSession } from "context/session";
 import stylesPage from "../assets/css/dashboard.module.css";
 
 const Index = () => {
+  const encodedContext = useSession()?.context;
+  const [storeContext, setStoreContext] = useState('');
+
+  useEffect(()=>{
+    setStoreContext(encodedContext);
+  },[encodedContext])
+
   return (
-    <div className={stylesPage.dashboard}>
+    <div className={stylesPage.dashboard} data-context={storeContext}>
       <div className={stylesPage.inner_content}>
         
         <div className={stylesPage.ic_right}>
