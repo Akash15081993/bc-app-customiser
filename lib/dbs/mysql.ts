@@ -50,14 +50,14 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init")
+  console.warn("setStore Init V1")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
 
   const { id, username, email } = owner;
 
-  console.warn("setStore Init 1")
+  console.warn("setStore Init 11")
 
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
@@ -71,14 +71,14 @@ export async function setStore(session: SessionProps) {
   };
 
   try {
-    console.warn("setStore Init 2")
+    console.warn("setStore Init 22")
     await query("REPLACE INTO stores SET ?", storeData);
-    console.warn("setStore Init 2.2")
+    console.warn("setStore Init 22.2")
   } catch (err) {
     console.error("DB Insert stores error:", err);
   }
 
-  console.warn("setStore Init 3")
+  console.warn("setStore Init 33")
 
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
