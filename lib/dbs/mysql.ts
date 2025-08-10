@@ -77,8 +77,8 @@ export async function setStore(session: SessionProps) {
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
 
-  console.log('existing')
-  console.log(existing)
+  console.warn('existing')
+  console.warn(existing)
 
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
