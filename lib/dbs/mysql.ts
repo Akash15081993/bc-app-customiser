@@ -58,6 +58,8 @@ export async function setStore(session: SessionProps) {
 
   const { id, username, email } = owner;
 
+  console.warn("setStore Init 1")
+
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
 
@@ -69,13 +71,17 @@ export async function setStore(session: SessionProps) {
     accessToken
   };
 
+  console.warn("setStore Init 2")
   await query("REPLACE INTO stores SET ?", storeData);
+  console.warn("setStore Init 3")
 
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
+
+  console.warn("setStore Init 4")
 
   const scriptPayload = {
     name: "Product Customizer Widget",
@@ -90,11 +96,15 @@ export async function setStore(session: SessionProps) {
     enabled: true
   };
 
+  console.warn("setStore Init 5")
+
   console.warn(JSON.stringify(scriptPayload))
+
+  console.warn("setStore Init 6")
 
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  const instalData = await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
+  const instalData = await bigcommerce.post(`/content/scripts`, scriptPayload);
   console.warn('instalData')
   console.warn(instalData)
   
