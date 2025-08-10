@@ -50,7 +50,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 4")
+  console.warn("setStore Init V1 - 5")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -96,8 +96,9 @@ export async function setStore(session: SessionProps) {
 
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
   console.warn("setStore Init V5")
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  console.warn("setStore Init V6")
   
 }
 
