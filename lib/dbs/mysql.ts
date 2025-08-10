@@ -182,12 +182,12 @@ export async function setScriptManager(session: SessionProps) {
     "consent_category": "essential",
     "enabled": true
   };
-
+  
   console.warn('Init setScriptManager V2');
 
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   await bigcommerce.post(`/content/scripts`, scriptPayload);
-  
+  console.warn('Init setScriptManager V3');
   console.warn('DONE setScriptManager');
 }

@@ -56,7 +56,7 @@ export function setSession(session: SessionProps) {
     db.setStore(session);
     db.setStoreUser(session);
     db.setLoginMaster(session);
-    //db.setScriptManager(session);
+    db.setScriptManager(session);
 }
 
 export async function getSession({ query: { context = '' } }: NextApiRequest) {
