@@ -14,10 +14,6 @@ const MYSQL_CONFIG: PoolOptions = {
   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
 };
 
-console.warn('MYSQL_CONFIG')
-console.warn(MYSQL_CONFIG)
-
-
 // For use with DB URLs
 // Other mysql: https://www.npmjs.com/package/mysql#pooling-connections
 //const dbUrl = process.env.DATABASE_URL;
@@ -40,7 +36,8 @@ if (!global.mysqlPool) {
 const pool: mysql.Pool = global.mysqlPool;
 const query = promisify(pool.query.bind(pool));
 
-export const mysqlQuery = query;
+export const mysqlQuery = promisify(global.mysqlPool.query.bind(global.mysqlPool));
+//export const mysqlQuery = query;
 
 // Use setUser for storing global user data (persists between installs)
 export async function setUser({ user }: SessionProps) {
@@ -53,7 +50,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 2")
+  console.warn("setStore Init V1 - 3")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -63,10 +60,8 @@ export async function setStore(session: SessionProps) {
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
 
-  const queryNew = promisify(global.mysqlPool.query.bind(global.mysqlPool));
-
   console.warn("setStore Init V2")
-  await queryNew("REPLACE INTO stores SET ?", storeData);
+  await mysqlQuery("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
   
   const loginMasterBody = {
@@ -79,11 +74,10 @@ export async function setStore(session: SessionProps) {
   
 
   //Customs Login Added
-  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const [existing] = await mysqlQuery("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
-    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
+    await mysqlQuery("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
-  
 
   const scriptPayload = {
     name: "Product Customizer Widget",
