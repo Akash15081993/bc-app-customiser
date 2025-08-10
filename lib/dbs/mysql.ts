@@ -10,6 +10,8 @@ const MYSQL_CONFIG: PoolOptions = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: 7000,
+  ssl: { rejectUnauthorized: true },
   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
 };
 
@@ -57,7 +59,7 @@ export async function setStore(session: SessionProps) {
 
   const { id, username, email } = owner;
 
-  console.warn("setStore Init V111")
+  console.warn("setStore Init V1.1")
 
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
@@ -70,28 +72,29 @@ export async function setStore(session: SessionProps) {
     accessToken
   };
 
-  try {
-    console.warn("setStore Init 22-")
-    await mysqlQuery("REPLACE INTO stores SET ?", storeData);
-    console.warn("setStore Init 22.2")
-  } catch (err) {
-    console.error("DB Insert stores error:", err);
-  }
+  const timeout = setTimeout(() => {
+    console.warn("setStore Init V1.2")
+    console.error("❌ DB query still not finished after 5s — likely hanging");
+  }, 5000);
 
-  console.warn("setStore Init 33")
+
+  console.warn("setStore Init V1.3")
+  await query("REPLACE INTO stores SET ?", storeData);
+  console.warn("setStore Init V1.4")
+  clearTimeout(timeout);
 
   //Customs Login Added
-  const [existing] = await mysqlQuery("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
 
   console.warn('existing')
   console.warn(existing)
 
   if (!existing) {
     //return undefined
-    await mysqlQuery("INSERT INTO loginMaster SET ?", loginMasterBody);
+    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
 
-  console.warn("setStore Init 4")
+  console.warn("setStore Init V1.5")
 
   const scriptPayload = {
     name: "Product Customizer Widget",
@@ -106,11 +109,9 @@ export async function setStore(session: SessionProps) {
     enabled: true
   };
 
-  console.warn("setStore Init 5")
-
+  console.warn("setStore Init V1.6")
   console.warn(JSON.stringify(scriptPayload))
-
-  console.warn("setStore Init 6")
+  console.warn("setStore Init V1.7")
 
   
 }
