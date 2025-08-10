@@ -65,10 +65,11 @@ export async function setStore(session: SessionProps) {
 
   const poolOne: mysql.Pool = global.mysqlPool;
   const queryOne = promisify(pool.query.bind(poolOne));
-
   console.warn("setStore Init V2")
   await queryOne("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
+  await poolOne.end();
+  console.log('MySQL1 pool closed.');
 
   const loginMasterBody = {
     email,
@@ -79,11 +80,15 @@ export async function setStore(session: SessionProps) {
   };
   
   //Customs Login Added
-  const [existing] = await queryOne("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const poolTwo: mysql.Pool = global.mysqlPool;
+  const queryTwo = promisify(pool.query.bind(poolTwo));
+  const [existing] = await queryTwo("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
-    await queryOne("INSERT INTO loginMaster SET ?", loginMasterBody);
+    await queryTwo("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
-  console.warn("setStore Init V4")
+  await poolTwo.end();
+  console.log('MySQL2 pool closed.');
+  
 
   const scriptPayload = {
     name: "Product Customizer Widget",
