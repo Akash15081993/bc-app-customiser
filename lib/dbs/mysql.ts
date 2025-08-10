@@ -57,7 +57,7 @@ export async function setStore(session: SessionProps) {
 
   const { id, username, email } = owner;
 
-  console.warn("setStore Init 11")
+  console.warn("setStore Init V111")
 
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
@@ -71,8 +71,8 @@ export async function setStore(session: SessionProps) {
   };
 
   try {
-    console.warn("setStore Init 22")
-    await query("REPLACE INTO stores SET ?", storeData);
+    console.warn("setStore Init 22-")
+    await mysqlQuery("REPLACE INTO stores SET ?", storeData);
     console.warn("setStore Init 22.2")
   } catch (err) {
     console.error("DB Insert stores error:", err);
@@ -81,13 +81,14 @@ export async function setStore(session: SessionProps) {
   console.warn("setStore Init 33")
 
   //Customs Login Added
-  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const [existing] = await mysqlQuery("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
 
   console.warn('existing')
   console.warn(existing)
 
   if (!existing) {
-    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
+    //return undefined
+    await mysqlQuery("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
 
   console.warn("setStore Init 4")

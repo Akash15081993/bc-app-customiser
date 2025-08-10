@@ -3,6 +3,8 @@ import { getBCVerify, removeDataStore } from '../../lib/auth';
 
 export default async function uninstall(req: NextApiRequest, res: NextApiResponse) {
     try {
+        console.log('req.query uninstall.ts')
+        console.log(req.query)
         const session = await getBCVerify(req.query);
         await removeDataStore(session);
         res.status(200).end();

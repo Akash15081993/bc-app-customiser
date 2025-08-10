@@ -9,6 +9,7 @@ const Index = () => {
           <img
             src="/assets/app-default-dashboard.png"
             alt="default-dashboard"
+            style={{objectFit:'contain'}}
           />
         </div>
 
