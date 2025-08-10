@@ -69,7 +69,7 @@ export async function setStore(session: SessionProps) {
   await queryOne("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
   await poolOne.end();
-  console.log('MySQL1 pool closed.');
+  console.warn('MySQL1 pool closed.');
 
   const loginMasterBody = {
     email,
@@ -87,7 +87,7 @@ export async function setStore(session: SessionProps) {
     await queryTwo("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
   await poolTwo.end();
-  console.log('MySQL2 pool closed.');
+  console.warn('MySQL2 pool closed.');
   
 
   const scriptPayload = {
