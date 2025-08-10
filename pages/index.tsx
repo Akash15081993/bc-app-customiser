@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "context/session";
 import stylesPage from "../assets/css/dashboard.module.css";
-import { useProducts } from "@lib/hooks";
-import Loading from "@components/loading";
 
 const Index = () => {
   const encodedContext = useSession()?.context;
@@ -12,9 +10,6 @@ const Index = () => {
     setStoreContext(encodedContext);
   },[encodedContext])
 
-  const { isLoading } = useProducts();
-
-  if (isLoading) return <Loading />;
 
   return (
     <div className={stylesPage.dashboard} data-context={storeContext}>
