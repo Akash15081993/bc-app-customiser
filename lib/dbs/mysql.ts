@@ -2,18 +2,18 @@ import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
 import { SessionProps, StoreData } from "../../types";
 
-const MYSQL_CONFIG: PoolOptions = {
-  host: process.env.MYSQL_HOST,
-  database: process.env.MYSQL_DATABASE,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  connectTimeout: 7000,
-  ssl: { rejectUnauthorized: true },
-  ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
-};
+// const MYSQL_CONFIG: PoolOptions = {
+//   host: process.env.MYSQL_HOST,
+//   database: process.env.MYSQL_DATABASE,
+//   user: process.env.MYSQL_USERNAME,
+//   password: process.env.MYSQL_PASSWORD,
+//   waitForConnections: true,
+//   connectionLimit: 10,
+//   queueLimit: 0,
+//   connectTimeout: 7000,
+//   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
+// };
+
 
 
 // For use with DB URLs
@@ -21,23 +21,51 @@ const MYSQL_CONFIG: PoolOptions = {
 //const dbUrl = process.env.DATABASE_URL;
 // const pool = dbUrl ? mysql.createPool(dbUrl) : mysql.createPool(MYSQL_CONFIG);
 
-// Create and share global pool
-if (!global.mysqlPool) {
-  global.mysqlPool = mysql.createPool(MYSQL_CONFIG);
-  // Optional: test connection immediately
-  global.mysqlPool.getConnection((err, connection) => {
-    if (err) {
-      console.warn('[MySQL] ❌ Connection failed:', err.message);
-    } else {
-      console.warn('[MySQL] ✅ Connection successful');
-      connection.release();
-    }
-  });
+
+let pool;
+
+function getPool() {
+  if (!pool) {
+    pool = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+  }
+  return pool;
 }
 
-const pool: mysql.Pool = global.mysqlPool;
+// // Create and share global pool
+// if (!global.mysqlPool) {
+//   global.mysqlPool = mysql.createPool(MYSQL_CONFIG);
+//   // Optional: test connection immediately
+//   global.mysqlPool.getConnection((err, connection) => {
+//     if (err) {
+//       console.warn('[MySQL] ❌ Connection failed:', err.message);
+//     } else {
+//       console.warn('[MySQL] ✅ Connection successful');
+//       connection.release();
+//     }
+//   });
+// }
 
-const query = promisify(pool.query.bind(pool));
+// const pool: mysql.Pool = global.mysqlPool;
+
+//const query = promisify(pool.query.bind(pool));
+
+export async function query(sql, params) {
+  const conn = await getPool().getConnection();
+  try {
+    const [rows] = await conn.query(sql, params);
+    return rows;
+  } finally {
+    conn.release();
+  }
+}
 
 export const mysqlQuery = query;
 
