@@ -53,7 +53,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 1")
+  console.warn("setStore Init V1 - 2")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -63,10 +63,10 @@ export async function setStore(session: SessionProps) {
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
 
-  const poolOne: mysql.Pool = global.mysqlPool;
-  const queryOne = promisify(pool.query.bind(poolOne));
+  const queryNew = promisify(global.mysqlPool.query.bind(global.mysqlPool));
+
   console.warn("setStore Init V2")
-  await queryOne("REPLACE INTO stores SET ?", storeData);
+  await queryNew("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
   
   const loginMasterBody = {
@@ -77,12 +77,11 @@ export async function setStore(session: SessionProps) {
     accessToken
   };
   
+
   //Customs Login Added
-  const poolTwo: mysql.Pool = global.mysqlPool;
-  const queryTwo = promisify(pool.query.bind(poolTwo));
-  const [existing] = await queryTwo("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
-    await queryTwo("INSERT INTO loginMaster SET ?", loginMasterBody);
+    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
   
 
