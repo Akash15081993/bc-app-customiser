@@ -77,6 +77,10 @@ export async function setStore(session: SessionProps) {
 
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+
+  console.log('existing')
+  console.log(existing)
+
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
@@ -102,11 +106,6 @@ export async function setStore(session: SessionProps) {
 
   console.warn("setStore Init 6")
 
-  //Add script at Script Manager 
-  const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  const instalData = await bigcommerce.post(`/content/scripts`, scriptPayload);
-  console.warn('instalData')
-  console.warn(instalData)
   
 }
 
