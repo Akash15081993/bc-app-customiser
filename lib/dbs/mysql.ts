@@ -1,18 +1,18 @@
-import mysql from "mysql2";
+import mysql, { PoolOptions } from "mysql2";
+import { promisify } from "util";
+import { bigcommerceClient } from "@lib/auth";
 import { SessionProps, StoreData } from "../../types";
 
-// const MYSQL_CONFIG: PoolOptions = {
-//   host: process.env.MYSQL_HOST,
-//   database: process.env.MYSQL_DATABASE,
-//   user: process.env.MYSQL_USERNAME,
-//   password: process.env.MYSQL_PASSWORD,
-//   waitForConnections: true,
-//   connectionLimit: 10,
-//   queueLimit: 0,
-//   connectTimeout: 7000,
-//   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
-// };
-
+const MYSQL_CONFIG: PoolOptions = {
+  host: process.env.MYSQL_HOST,
+  database: process.env.MYSQL_DATABASE,
+  user: process.env.MYSQL_USERNAME,
+  password: process.env.MYSQL_PASSWORD,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
+};
 
 
 // For use with DB URLs
@@ -20,51 +20,23 @@ import { SessionProps, StoreData } from "../../types";
 //const dbUrl = process.env.DATABASE_URL;
 // const pool = dbUrl ? mysql.createPool(dbUrl) : mysql.createPool(MYSQL_CONFIG);
 
-
-let pool;
-
-function getPool() {
-  if (!pool) {
-    pool = mysql.createPool({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    });
-  }
-  return pool;
+// Create and share global pool
+if (!global.mysqlPool) {
+  global.mysqlPool = mysql.createPool(MYSQL_CONFIG);
+  // Optional: test connection immediately
+  global.mysqlPool.getConnection((err, connection) => {
+    if (err) {
+      console.warn('[MySQL] ❌ Connection failed:', err.message);
+    } else {
+      console.warn('[MySQL] ✅ Connection successful');
+      connection.release();
+    }
+  });
 }
 
-// // Create and share global pool
-// if (!global.mysqlPool) {
-//   global.mysqlPool = mysql.createPool(MYSQL_CONFIG);
-//   // Optional: test connection immediately
-//   global.mysqlPool.getConnection((err, connection) => {
-//     if (err) {
-//       console.warn('[MySQL] ❌ Connection failed:', err.message);
-//     } else {
-//       console.warn('[MySQL] ✅ Connection successful');
-//       connection.release();
-//     }
-//   });
-// }
+const pool: mysql.Pool = global.mysqlPool;
 
-// const pool: mysql.Pool = global.mysqlPool;
-
-//const query = promisify(pool.query.bind(pool));
-
-export async function query(sql, params) {
-  const conn = await getPool().getConnection();
-  try {
-    const [rows] = await conn.query(sql, params);
-    return rows;
-  } finally {
-    conn.release();
-  }
-}
+const query = promisify(pool.query.bind(pool));
 
 export const mysqlQuery = query;
 
@@ -79,49 +51,15 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1")
+  console.warn("setStore Init")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
 
   const { id, username, email } = owner;
 
-  console.warn("setStore Init V1.1")
-
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
-
-  const loginMasterBody = {
-    email,
-    userId:id,
-    userName:username,
-    storeHash,
-    accessToken
-  };
-
-  const timeout = setTimeout(() => {
-    console.warn("setStore Init V1.2")
-    console.error("❌ DB query still not finished after 5s — likely hanging");
-  }, 5000);
-
-
-  console.warn("setStore Init V1.3")
-  await query("REPLACE INTO stores SET ?", storeData);
-  console.warn("setStore Init V1.4")
-  clearTimeout(timeout);
-
-  //Customs Login Added
-  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
-
-  console.warn('existing')
-  console.warn(existing)
-
-  if (!existing) {
-    //return undefined
-    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
-  }
-
-  console.warn("setStore Init V1.5")
 
   const scriptPayload = {
     name: "Product Customizer Widget",
@@ -136,10 +74,25 @@ export async function setStore(session: SessionProps) {
     enabled: true
   };
 
-  console.warn("setStore Init V1.6")
-  console.warn(JSON.stringify(scriptPayload))
-  console.warn("setStore Init V1.7")
+  //Add script at Script Manager 
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
 
+  const loginMasterBody = {
+    email,
+    userId:id,
+    userName:username,
+    storeHash,
+    accessToken
+  };
+
+  await query("REPLACE INTO stores SET ?", storeData);
+  //Customs Login Added
+  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  if (!existing) {
+    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
+  }
+  
   
 }
 
