@@ -182,7 +182,6 @@ export async function setScriptManager(session: SessionProps) {
     "consent_category": "essential",
     "enabled": true
   };
-  
   console.warn('Init setScriptManager V2');
 
   //Add script at Script Manager 
