@@ -49,51 +49,14 @@ export async function setUser({ user }: SessionProps) {
   await query("REPLACE INTO users SET ?", userData);
 }
 
+
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 8")
-  const { access_token: accessToken, context, scope, owner, } = session;
+  const { access_token: accessToken, context, scope } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
-
-  const { id, username, email } = owner;
-
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
-
-  console.warn("setStore Init V2")
   await query("REPLACE INTO stores SET ?", storeData);
-  console.warn("setStore Init V3")
-  
-  const loginMasterBody = { email, userId:id, userName:username, storeHash, accessToken };
-
-  //Customs Login Added
-  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
-  if (!existing) {
-    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
-  }
-
-  const scriptPayload = {
-    "name": "Product Customizer Widget",
-    "description": "Injects product customizer app widget.",
-    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
-    "auto_uninstall": true,
-    "load_method": "default",
-    "location": "footer",
-    "visibility": "storefront",
-    "kind": "src",
-    "consent_category": "essential",
-    "enabled": true
-  };
-
-  console.warn("scriptPayload")
-  console.warn(scriptPayload)
-
-  //Add script at Script Manager 
-  const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  console.warn("setStore Init V5")
-  await bigcommerce.post(`/content/scripts`, scriptPayload);
-  console.warn("setStore Init V6")
-  
 }
 
 // Use setStoreUser for storing store specific variables
@@ -175,4 +138,48 @@ export async function getStoreToken(storeHash: string) {
 
 export async function deleteStore({ store_hash: storeHash }: SessionProps) {
   await query("DELETE FROM stores WHERE storeHash = ?", storeHash);
+}
+
+export async function setLoginMaster(session: SessionProps) {
+  console.warn('Init setLoginMaster');
+  const { access_token: accessToken, context, scope, owner } = session;
+  // Only set on app install or update
+  if (!accessToken || !scope) return null;
+  const { id, username, email } = owner;
+  const storeHash = context?.split("/")[1] || "";
+  
+  const loginMasterBody = { email, userId:id, userName:username, storeHash, accessToken };
+
+  //Customs Login Added
+  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  if (!existing) {
+    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
+  }
+  console.warn('DONE setLoginMaster');
+}
+
+export async function setScriptManager(session: SessionProps) {
+  console.warn('Init setScriptManager');
+  const { access_token: accessToken, context, scope } = session;
+  // Only set on app install or update
+  if (!accessToken || !scope) return null;
+  const storeHash = context?.split("/")[1] || "";
+  
+  const scriptPayload = {
+    "name": "Product Customizer Widget",
+    "description": "Injects product customizer app widget.",
+    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
+    "auto_uninstall": true,
+    "load_method": "default",
+    "location": "footer",
+    "visibility": "storefront",
+    "kind": "src",
+    "consent_category": "essential",
+    "enabled": true
+  };
+
+  //Add script at Script Manager 
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  console.warn('DONE setScriptManager');
 }
