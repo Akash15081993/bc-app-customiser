@@ -90,7 +90,7 @@ export async function setStore(session: SessionProps) {
   };
 
   //Add script at Script Manager 
-  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  const bigcommerce = bigcommerceClient("jrrxlg9ucco27d6z1xj6q32ms50zj46", storeHash);
   await bigcommerce.post(`/content/scripts`, scriptPayload);
   
 }
