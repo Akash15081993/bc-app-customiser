@@ -14,9 +14,6 @@ const MYSQL_CONFIG: PoolOptions = {
   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
 };
 
-console.warn('MYSQL_CONFIG')
-console.warn(MYSQL_CONFIG)
-
 
 // For use with DB URLs
 // Other mysql: https://www.npmjs.com/package/mysql#pooling-connections
@@ -63,10 +60,8 @@ export async function setStore(session: SessionProps) {
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
 
-  const poolOne: mysql.Pool = global.mysqlPool;
-  const queryOne = promisify(pool.query.bind(poolOne));
   console.warn("setStore Init V2")
-  await queryOne("REPLACE INTO stores SET ?", storeData);
+  await query("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
   
   const loginMasterBody = {
@@ -78,11 +73,9 @@ export async function setStore(session: SessionProps) {
   };
   
   //Customs Login Added
-  const poolTwo: mysql.Pool = global.mysqlPool;
-  const queryTwo = promisify(pool.query.bind(poolTwo));
-  const [existing] = await queryTwo("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
-    await queryTwo("INSERT INTO loginMaster SET ?", loginMasterBody);
+    await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
 
   const scriptPayload = {
@@ -103,7 +96,7 @@ export async function setStore(session: SessionProps) {
 
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
   console.warn("setStore Init V5")
   
 }
