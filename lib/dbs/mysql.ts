@@ -53,7 +53,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1")
+  console.warn("setStore Init V1 - 1")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -68,9 +68,7 @@ export async function setStore(session: SessionProps) {
   console.warn("setStore Init V2")
   await queryOne("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
-  await poolOne.end();
-  console.warn('MySQL1 pool closed.');
-
+  
   const loginMasterBody = {
     email,
     userId:id,
@@ -86,8 +84,6 @@ export async function setStore(session: SessionProps) {
   if (!existing) {
     await queryTwo("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
-  await poolTwo.end();
-  console.warn('MySQL2 pool closed.');
   
 
   const scriptPayload = {
