@@ -79,16 +79,16 @@ export async function setStore(session: SessionProps) {
   }
 
   const scriptPayload = {
-    name: "Product Customizer Widget",
-    description: "Injects product customizer app widget.",
-    src : process?.env?.customizer_backend_domain+""+process?.env?.customizer_scritp,
-    auto_uninstall: true,
-    load_method: "default",
-    location: "footer",
-    visibility: "storefront",
-    kind: "src",
-    consent_category: "essential",
-    enabled: true
+    "name": "Product Customizer Widget",
+    "description": "Injects product customizer app widget.",
+    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
+    "auto_uninstall": true,
+    "load_method": "default",
+    "location": "footer",
+    "visibility": "storefront",
+    "kind": "src",
+    "consent_category": "essential",
+    "enabled": true
   };
 
   console.warn("scriptPayload")
