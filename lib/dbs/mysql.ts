@@ -1,6 +1,7 @@
 import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
 import { SessionProps, StoreData } from "../../types";
+import { bigcommerceClient } from "@lib/auth";
 
 const MYSQL_CONFIG: PoolOptions = {
   host: process.env.MYSQL_HOST,
@@ -75,6 +76,23 @@ export async function setStore(session: SessionProps) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
 
+  const scriptPayload = {
+    name: "Product Customizer Widget",
+    description: "Injects product customizer app widget.",
+    src : process?.env?.customizer_backend_domain+""+process?.env?.customizer_scritp,
+    auto_uninstall: true,
+    load_method: "default",
+    location: "footer",
+    visibility: "storefront",
+    kind: "src",
+    consent_category: "essential",
+    enabled: true
+  };
+
+  //Add script at Script Manager 
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  
 }
 
 // Use setStoreUser for storing store specific variables
