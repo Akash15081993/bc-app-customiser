@@ -50,7 +50,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 5")
+  console.warn("setStore Init V1 - 6")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -81,14 +81,14 @@ export async function setStore(session: SessionProps) {
   const scriptPayload = {
     "name": "Product Customizer Widget",
     "description": "Injects product customizer app widget.",
-    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
+    "html" : `{{#if page_type "==" "product"}}<script src="${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}" defer></script>{{/if}}`,
     "auto_uninstall": true,
     "load_method": "default",
     "location": "footer",
     "visibility": "storefront",
-    "kind": "src",
+    "kind": "script_tag",
     "consent_category": "essential",
-    "enabled": true
+    "enabled": false
   };
 
   console.warn("scriptPayload")
