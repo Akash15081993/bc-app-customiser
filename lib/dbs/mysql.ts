@@ -1,6 +1,5 @@
 import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
-import { bigcommerceClient } from "@lib/auth";
 import { SessionProps, StoreData } from "../../types";
 
 const MYSQL_CONFIG: PoolOptions = {
@@ -77,28 +76,6 @@ export async function setStore(session: SessionProps) {
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
-
-  const scriptPayload = {
-    "name": "Product Customizer Widget",
-    "description": "Injects product customizer app widget.",
-    "html" : `{{#if page_type "==" "product"}}<script src="${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}" defer></script>{{/if}}`,
-    "auto_uninstall": true,
-    "load_method": "default",
-    "location": "footer",
-    "visibility": "storefront",
-    "kind": "script_tag",
-    "consent_category": "essential",
-    "enabled": false
-  };
-
-  console.warn("scriptPayload")
-  console.warn(scriptPayload)
-
-  //Add script at Script Manager 
-  const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  console.warn("setStore Init V5")
-  await bigcommerce.post(`/content/scripts`, scriptPayload);
-  console.warn("setStore Init V6")
   
 }
 
