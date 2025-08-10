@@ -14,6 +14,10 @@ const MYSQL_CONFIG: PoolOptions = {
   ...(process.env.MYSQL_PORT && { port: Number(process.env.MYSQL_PORT) }),
 };
 
+console.warn('MYSQL_CONFIG')
+console.warn(MYSQL_CONFIG)
+
+
 // For use with DB URLs
 // Other mysql: https://www.npmjs.com/package/mysql#pooling-connections
 //const dbUrl = process.env.DATABASE_URL;
@@ -36,8 +40,7 @@ if (!global.mysqlPool) {
 const pool: mysql.Pool = global.mysqlPool;
 const query = promisify(pool.query.bind(pool));
 
-export const mysqlQuery = promisify(global.mysqlPool.query.bind(global.mysqlPool));
-//export const mysqlQuery = query;
+export const mysqlQuery = query;
 
 // Use setUser for storing global user data (persists between installs)
 export async function setUser({ user }: SessionProps) {
@@ -50,7 +53,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 3")
+  console.warn("setStore Init V1 - 4")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -60,8 +63,10 @@ export async function setStore(session: SessionProps) {
   const storeHash = context?.split("/")[1] || "";
   const storeData: StoreData = { accessToken, scope, storeHash };
 
+  const poolOne: mysql.Pool = global.mysqlPool;
+  const queryOne = promisify(pool.query.bind(poolOne));
   console.warn("setStore Init V2")
-  await mysqlQuery("REPLACE INTO stores SET ?", storeData);
+  await queryOne("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
   
   const loginMasterBody = {
@@ -72,11 +77,12 @@ export async function setStore(session: SessionProps) {
     accessToken
   };
   
-
   //Customs Login Added
-  const [existing] = await mysqlQuery("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+  const poolTwo: mysql.Pool = global.mysqlPool;
+  const queryTwo = promisify(pool.query.bind(poolTwo));
+  const [existing] = await queryTwo("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
-    await mysqlQuery("INSERT INTO loginMaster SET ?", loginMasterBody);
+    await queryTwo("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
 
   const scriptPayload = {
