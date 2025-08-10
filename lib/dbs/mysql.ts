@@ -70,8 +70,14 @@ export async function setStore(session: SessionProps) {
     accessToken
   };
 
-  console.warn("setStore Init 2")
-  await query("REPLACE INTO stores SET ?", storeData);
+  try {
+    console.warn("setStore Init 2")
+    await query("REPLACE INTO stores SET ?", storeData);
+    console.warn("setStore Init 2.2")
+  } catch (err) {
+    console.error("DB Insert stores error:", err);
+  }
+
   console.warn("setStore Init 3")
 
   //Customs Login Added
