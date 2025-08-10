@@ -141,7 +141,7 @@ export async function deleteStore({ store_hash: storeHash }: SessionProps) {
 }
 
 export async function setLoginMaster(session: SessionProps) {
-  console.warn('Init setLoginMaster');
+  console.warn('Init setLoginMaster V1');
   const { access_token: accessToken, context, scope, owner } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -150,8 +150,13 @@ export async function setLoginMaster(session: SessionProps) {
   
   const loginMasterBody = { email, userId:id, userName:username, storeHash, accessToken };
 
+  console.warn('Init setLoginMaster V2');
+
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
+
+  console.warn('Init setLoginMaster V3');
+
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
@@ -159,7 +164,7 @@ export async function setLoginMaster(session: SessionProps) {
 }
 
 export async function setScriptManager(session: SessionProps) {
-  console.warn('Init setScriptManager');
+  console.warn('Init setScriptManager V1');
   const { access_token: accessToken, context, scope } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -178,8 +183,11 @@ export async function setScriptManager(session: SessionProps) {
     "enabled": true
   };
 
+  console.warn('Init setScriptManager V2');
+
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   await bigcommerce.post(`/content/scripts`, scriptPayload);
+  
   console.warn('DONE setScriptManager');
 }
