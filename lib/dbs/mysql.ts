@@ -89,9 +89,13 @@ export async function setStore(session: SessionProps) {
     enabled: true
   };
 
+  console.warn(JSON.stringify(scriptPayload))
+
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient("jrrxlg9ucco27d6z1xj6q32ms50zj46", storeHash);
-  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  const instalData = await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
+  console.warn('instalData')
+  console.warn(instalData)
   
 }
 
