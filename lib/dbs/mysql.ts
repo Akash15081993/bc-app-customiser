@@ -1,5 +1,6 @@
 import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
+import { bigcommerceClient } from "@lib/auth";
 import { SessionProps, StoreData } from "../../types";
 
 const MYSQL_CONFIG: PoolOptions = {
@@ -49,7 +50,7 @@ export async function setUser({ user }: SessionProps) {
 }
 
 export async function setStore(session: SessionProps) {
-  console.warn("setStore Init V1 - 6")
+  console.warn("setStore Init V1 - 8")
   const { access_token: accessToken, context, scope, owner, } = session;
   // Only set on app install or update
   if (!accessToken || !scope) return null;
@@ -63,19 +64,35 @@ export async function setStore(session: SessionProps) {
   await query("REPLACE INTO stores SET ?", storeData);
   console.warn("setStore Init V3")
   
-  const loginMasterBody = {
-    email,
-    userId:id,
-    userName:username,
-    storeHash,
-    accessToken
-  };
-  
+  const loginMasterBody = { email, userId:id, userName:username, storeHash, accessToken };
+
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
+
+  const scriptPayload = {
+    "name": "Product Customizer Widget",
+    "description": "Injects product customizer app widget.",
+    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
+    "auto_uninstall": true,
+    "load_method": "default",
+    "location": "footer",
+    "visibility": "storefront",
+    "kind": "src",
+    "consent_category": "essential",
+    "enabled": true
+  };
+
+  console.warn("scriptPayload")
+  console.warn(scriptPayload)
+
+  //Add script at Script Manager 
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  console.warn("setStore Init V5")
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  console.warn("setStore Init V6")
   
 }
 
