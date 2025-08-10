@@ -1,7 +1,7 @@
 import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
-import { SessionProps, StoreData } from "../../types";
 import { bigcommerceClient } from "@lib/auth";
+import { SessionProps, StoreData } from "../../types";
 
 const MYSQL_CONFIG: PoolOptions = {
   host: process.env.MYSQL_HOST,
