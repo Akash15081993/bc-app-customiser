@@ -1,4 +1,8 @@
 const languageEN = {
+  appDetails : {
+    name: "KR Customizer",
+    email: "info@kds-customizer.com"
+  },
   modifierDisplayNames : {
     designId: "Design Id",
     viewDesign: "View Design",

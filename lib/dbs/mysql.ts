@@ -1,5 +1,6 @@
 import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
+import { bigcommerceClient } from "@lib/auth";
 import { SessionProps, StoreData } from "../../types";
 
 const MYSQL_CONFIG: PoolOptions = {
@@ -159,30 +160,26 @@ export async function deleteStore({ store_hash: storeHash }: SessionProps) {
   await query("DELETE FROM stores WHERE storeHash = ?", storeHash);
 }
 
-// export async function setScriptManager(session: SessionProps) {
-//   console.warn('Init setScriptManager V1');
-//   const { access_token: accessToken, context, scope } = session;
-//   // Only set on app install or update
-//   if (!accessToken || !scope) return null;
-//   const storeHash = context?.split("/")[1] || "";
+export async function setScriptManager(session: SessionProps) {
+  const { access_token: accessToken, context, scope } = session;
+  // Only set on app install or update
+  if (!accessToken || !scope) return null;
+  const storeHash = context?.split("/")[1] || "";
   
-//   const scriptPayload = {
-//     "name": "Product Customizer Widget",
-//     "description": "Injects product customizer app widget.",
-//     "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
-//     "auto_uninstall": true,
-//     "load_method": "default",
-//     "location": "footer",
-//     "visibility": "storefront",
-//     "kind": "src",
-//     "consent_category": "essential",
-//     "enabled": true
-//   };
-//   console.warn('Init setScriptManager V2');
-
-//   //Add script at Script Manager 
-//   const bigcommerce = bigcommerceClient(accessToken, storeHash);
-//   await bigcommerce.post(`/content/scripts`, scriptPayload);
-//   console.warn('Init setScriptManager V3');
-//   console.warn('DONE setScriptManager');
-// }
+  const scriptPayload = {
+    "name": "KR Customizer",
+    "description": "KR Customizer customizer app Script",
+    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
+    "auto_uninstall": true,
+    "load_method": "default",
+    "location": "footer",
+    "visibility": "storefront",
+    "kind": "src",
+    "consent_category": "essential",
+    "enabled": true
+  };
+  
+  //Add script at Script Manager 
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
+}

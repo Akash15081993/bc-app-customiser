@@ -1,18 +1,10 @@
-import { useEffect, useState } from "react";
-import { useSession } from "context/session";
+import languageEN from "lang/en";
 import stylesPage from "../assets/css/dashboard.module.css";
 
 const Index = () => {
-  const encodedContext = useSession()?.context;
-  const [storeContext, setStoreContext] = useState('');
-
-  useEffect(()=>{
-    setStoreContext(encodedContext);
-  },[encodedContext])
-
-
+  
   return (
-    <div className={stylesPage.dashboard} data-context={storeContext}>
+    <div className={stylesPage.dashboard}>
       <div className={stylesPage.inner_content}>
         
         <div className={stylesPage.ic_right}>
@@ -33,11 +25,11 @@ const Index = () => {
       </div>
 
       <div className={stylesPage.contact_info}>
-        <h2>KDS Customizer</h2>
+        <h2>{languageEN?.appDetails?.name}</h2>
         <p>
           A variety of packages are offered. Please contact your{" "}
-          <b>KDS Customizer</b> Account Manager or <br />{" "}
-          <a href="mailto:info@kds-customizer.com">info@kds-customizer.com</a>{" "}
+          <b>{languageEN?.appDetails?.name}</b> Account Manager or <br />{" "}
+          <a href={`mailto:${languageEN?.appDetails?.email}`}>{languageEN?.appDetails?.email}</a>{" "}
           for more information
         </p>
       </div>
