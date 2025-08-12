@@ -166,15 +166,27 @@ export async function setScriptManager(session: SessionProps) {
   if (!accessToken || !scope) return null;
   const storeHash = context?.split("/")[1] || "";
   
+  // const scriptPayload = {
+  //   "name": "KR Customizer",
+  //   "description": "KR Customizer customizer app Script",
+  //   "src" : `${process?.env?.customizer_app_domain}scripts/bigcommerce/product.js`,
+  //   "auto_uninstall": true,
+  //   "load_method": "default",
+  //   "location": "footer",
+  //   "visibility": "storefront",
+  //   "kind": "src",
+  //   "consent_category": "essential",
+  //   "enabled": true
+  // };
   const scriptPayload = {
     "name": "KR Customizer",
     "description": "KR Customizer customizer app Script",
-    "src" : `${process?.env?.customizer_app_domain}scripts/bigcommerce/product.js`,
+    "html" : "<script>window.krcustomizer_config = { \"store_hash\" : \"{{settings.store_hash}}\", \"page_type\" : \"{{page_type}}\",\"storefront_api\" : \"{{settings.storefront_api.token}}\", \"product_id\" : \"{{product.id}}\", \"product_sku\" : \"{{product.sku}}\" }</script> <script src=\""+process?.env?.customizer_app_domain+"scripts/bigcommerce/product.js\" defer></script>",
     "auto_uninstall": true,
     "load_method": "default",
     "location": "footer",
-    "visibility": "storefront",
-    "kind": "src",
+    "visibility": "all_pages",
+    "kind": "script_tag",
     "consent_category": "essential",
     "enabled": true
   };
