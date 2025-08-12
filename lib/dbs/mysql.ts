@@ -169,7 +169,7 @@ export async function setScriptManager(session: SessionProps) {
   const scriptPayload = {
     "name": "KR Customizer",
     "description": "KR Customizer customizer app Script",
-    "src" : `${process?.env?.customizer_backend_domain}${process?.env?.customizer_scritp}`,
+    "src" : `${process?.env?.customizer_app_domain}scripts/bigcommerce/product.js`,
     "auto_uninstall": true,
     "load_method": "default",
     "location": "footer",
