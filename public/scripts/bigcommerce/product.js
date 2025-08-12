@@ -60,6 +60,8 @@ ele_customize_handel_button?.addEventListener("click", function () {
         }
     });
 
+    document.getElementById(kr_root_app_id).style.display = 'block';
+
 });
 
 ele_addtocart_handel_button?.addEventListener("click", function () {
