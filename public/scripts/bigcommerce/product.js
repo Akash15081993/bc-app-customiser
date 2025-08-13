@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (typeof window.mountProductCustomizer === 'function') {
         window.mountProductCustomizer(`#${kr_root_app_id}`, {
-            productId: 7
+            productId: krcustomizer_config?.product_id,
+            storeHash: krcustomizer_config?.store_hash
         });
     } else {
         console.error('Customizer failed to load');
