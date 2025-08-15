@@ -1,6 +1,7 @@
-console.log('krcustomizer_config V1')
+console.log('krcustomizer_config V2')
 console.log(krcustomizer_config)
 
+const bc_storefront_token = krcustomizer_config?.storefront_api;
 const kr_root_app_id = "kr-customizer-root";
 const ele_customize_handel_button = document?.querySelector('body .kr-customize-handel');
 const ele_addtocart_handel_button = document?.querySelector('body .kr-addtocart-handel');
@@ -62,31 +63,44 @@ ele_customize_handel_button?.addEventListener("click", function () {
 
 });
 
-ele_addtocart_handel_button?.addEventListener("click", function () {
-    console.log('kr_store_form_data')
-    console.log(kr_store_form_data)
-    
-    //Validation form
-    if (ele_product_form.checkValidity && !ele_product_form.checkValidity()) {
-        document.getElementById(kr_root_app_id).style.display = 'none';
-        if (ele_product_form.reportValidity) {
-            ele_product_form.reportValidity();
-        } else {
-            // IE fallback
-            const firstInvalid = ele_product_form.querySelector(":invalid");
-            if (firstInvalid) {
-                alert("Please fill out all required fields.");
-                firstInvalid.focus();
+
+document.addEventListener("click", async function (e) {
+    const button = e.target.closest('[title="Add design to cart"]');
+    if (button) {
+
+        //Validation form
+        if (ele_product_form.checkValidity && !ele_product_form.checkValidity()) {
+            document.getElementById(kr_root_app_id).style.display = 'none';
+            if (ele_product_form.reportValidity) {
+                ele_product_form.reportValidity();
+            } else {
+                // IE fallback
+                const firstInvalid = ele_product_form.querySelector(":invalid");
+                if (firstInvalid) {
+                    alert("Please fill out all required fields.");
+                    firstInvalid.focus();
+                }
             }
+            return;
         }
-        return;
+
+        if (kr_store_form_data == null || (typeof kr_store_form_data === 'object' && Object.keys(kr_store_form_data).length === 0)) {
+            document.getElementById(kr_root_app_id).style.display = 'none';
+            return false;
+        }
+
+        document.getElementById(kr_root_app_id).style.display = 'block';
+
+        console.log('kr_store_form_data', kr_store_form_data);
+
+
+        const fetchData = await fetch("/graphql", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bc_storefront_token }
+        });
+        const resultData = fetchData?.json();
+        console.log('resultData')
+        console.log(resultData)
+
     }
-
-    if (kr_store_form_data == null || (typeof kr_store_form_data === 'object' && Object.keys(kr_store_form_data).length === 0)) {
-        document.getElementById(kr_root_app_id).style.display = 'none';
-        return false;
-    }
-
-    document.getElementById(kr_root_app_id).style.display = 'block';
-
 });
