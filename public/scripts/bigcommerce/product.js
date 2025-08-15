@@ -1,4 +1,4 @@
-console.log('krcustomizer_config V2')
+console.log('krcustomizer_config V3')
 console.log(krcustomizer_config)
 
 const bc_storefront_token = krcustomizer_config?.storefront_api;
@@ -96,10 +96,11 @@ document.addEventListener("click", async function (e) {
 
         const fetchData = await fetch("/graphql", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bc_storefront_token }
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bc_storefront_token },
+            body: JSON.stringify({'query': `query CategoryTree3LevelsDeep { site { categoryTree { name path } } }`})
         });
-        const resultData = fetchData?.json();
-        console.log('resultData')
+        const resultData = await fetchData?.json();
+        console.log('graphql resultData')
         console.log(resultData)
 
     }
