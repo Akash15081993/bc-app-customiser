@@ -122,7 +122,7 @@ async function productWithSelectedOptions(options) {
     const kr_product_price = productData?.prices?.price?.value;
     const kr_product_variant = await getProductVariantId(sku);
 
-    const krDesignData = window.localStorage.getItem("krDesignData");
+    const krDesignData = JSON.parse(window?.localStorage?.getItem("krDesignData"));
     return { kr_product_variant, kr_product_price, kr_product_id, kr_store_form_data, kr_store_hash, krDesignData };
 }
 
