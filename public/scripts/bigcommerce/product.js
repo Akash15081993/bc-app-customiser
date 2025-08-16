@@ -12,6 +12,17 @@ const ele_addtocart_handel_button = document?.querySelector('body .kr-addtocart-
 const ele_product_form = document?.querySelector('.productView-options form');
 let kr_store_form_data = {};
 
+async function getCart() {
+    const reqCart = await fetch('/api/storefront/cart?include=lineItems.digitalItems.options,lineItems.physicalItems.options', {
+        credentials: 'same-origin'
+    });
+    const resultCart = await reqCart?.json();
+    if (resultCart?.length > 0) {
+        return resultCart[0];
+    } else {
+        return null
+    }
+}
 
 //Root app model visibility
 function appModelVisibility(action) {
@@ -123,7 +134,11 @@ async function productWithSelectedOptions(options) {
     const kr_product_variant = await getProductVariantId(sku);
 
     const krDesignData = JSON.parse(window?.localStorage?.getItem("krDesignData"));
-    return { kr_product_variant, kr_product_price, kr_product_id, kr_store_form_data, kr_store_hash, krDesignData };
+
+    const cartData = await getCart();
+    const cartId = cartData?.id || null;
+
+    return { kr_product_variant, kr_product_price, kr_product_id, kr_store_form_data, kr_store_hash, krDesignData, cartId: cartId };
 }
 
 
@@ -157,7 +172,7 @@ document.addEventListener("click", async function (e) {
 
         const productData = await productWithSelectedOptions(kr_store_form_data);
 
-        console.log('productData Final');
+        console.log('productData Final V1');
         console.log(productData)
 
     }
