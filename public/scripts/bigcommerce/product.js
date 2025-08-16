@@ -1,10 +1,11 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig');
+console.log('krAppConfig V1');
 console.log(krAppConfig);
 
 const bc_storefront_token = krAppConfig?.storefront_api;
 const kr_product_id = krAppConfig?.product_id;
 const kr_store_hash = krAppConfig?.store_hash;
+const kr_page_type = krAppConfig?.page_type;
 
 const kr_root_app_id = "kr-customizer-root";
 const ele_customize_handel_button = document?.querySelector('body .kr-customize-handel');
@@ -35,17 +36,18 @@ function appModelVisibility(action) {
 
 //Mount app
 document.addEventListener('DOMContentLoaded', function () {
-    if (!document.getElementById(kr_root_app_id)) {
-        document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
-    }
-
-    if (typeof window.mountProductCustomizer === 'function') {
-        window.mountProductCustomizer(`#${kr_root_app_id}`, {
-            productId: kr_product_id,
-            storeHash: kr_store_hash
-        });
-    } else {
-        console.error('Customizer failed to load');
+    if(kr_page_type === "product") {
+        if (!document.getElementById(kr_root_app_id)) {
+            document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
+        }
+        if (typeof window.mountProductCustomizer === 'function') {
+            window.mountProductCustomizer(`#${kr_root_app_id}`, {
+                productId: kr_product_id,
+                storeHash: kr_store_hash
+            });
+        } else {
+            console.error('Customizer failed to load');
+        }
     }
 });
 

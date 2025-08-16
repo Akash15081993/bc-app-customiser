@@ -5,105 +5,20 @@ import languageEN from "lang/en";
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
   try {
-    //if (req.method === "GET") return res.status(405).json({ status: false, message: "Method not allowed" });
+    if (req.method === "GET") return res.status(405).json({ status: false, message: "Method not allowed" });
 
     try {
-
-      const bodyData = {
-        "kr_product_variant": 0,
-        "kr_product_price": 25.50,
-        "kr_product_id": "111",
-        "kr_store_form_data": {
-            "product_id": "111",
-            "qty[]": "1"
-        },
-        "kr_store_hash": "vl5e5n6g4x",
-        "krDesignData": {
-            "krDesignId": 74,
-            "krImageURL": [
-                "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352615/reivik0ih3nxsg67uxiq.png",
-                "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352617/yba89ceo7ilimrhp7gxy.png",
-                "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352618/ynkne7ujwatlklgjniuh.png",
-                "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352620/fajbibqfzvzj2wrw5l0b.png"
-            ],
-            "krDesignArea": {
-                "parts": {
-                    "Front": {
-                        "color": "#ffffff"
-                    }
-                },
-                "baseColors": {
-                    "Back": "#cacaca",
-                    "Collar": "#ffffff",
-                    "Front": "#ffffff",
-                    "LeftSleeve": "#cacaca",
-                    "Object_10": "#ffffff",
-                    "Object_11": "#cacaca",
-                    "Object_2": "#cacaca",
-                    "Object_3": "#383b3b",
-                    "Object_4": "#424b4b",
-                    "Object_5": "#cacaca",
-                    "Object_6": "#cacaca",
-                    "Object_8": "#cacaca",
-                    "Object_8001": "#cacaca",
-                    "Object_9": "#ffffff",
-                    "RightSleeve": "#cacaca"
-                }
-            },
-            "customizationData": {
-                "parts": {
-                    "Front": {
-                        "color": "#ffffff"
-                    }
-                },
-                "baseColors": {
-                    "Back": "#cacaca",
-                    "Collar": "#ffffff",
-                    "Front": "#ffffff",
-                    "LeftSleeve": "#cacaca",
-                    "Object_10": "#ffffff",
-                    "Object_11": "#cacaca",
-                    "Object_2": "#cacaca",
-                    "Object_3": "#383b3b",
-                    "Object_4": "#424b4b",
-                    "Object_5": "#cacaca",
-                    "Object_6": "#cacaca",
-                    "Object_8": "#cacaca",
-                    "Object_8001": "#cacaca",
-                    "Object_9": "#ffffff",
-                    "RightSleeve": "#cacaca"
-                }
-            },
-            "screenshots": [
-                {
-                    "angle": "front",
-                    "url": "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352615/reivik0ih3nxsg67uxiq.png"
-                },
-                {
-                    "angle": "back",
-                    "url": "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352617/yba89ceo7ilimrhp7gxy.png"
-                },
-                {
-                    "angle": "left",
-                    "url": "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352618/ynkne7ujwatlklgjniuh.png"
-                },
-                {
-                    "angle": "right",
-                    "url": "https://res.cloudinary.com/dt2lhechn/image/upload/v1755352620/fajbibqfzvzj2wrw5l0b.png"
-                }
-            ]
-        },
-        "cartId": null
-    } as any;
-
+      const bodyData = req.body as any;
       const kr_store_hash = bodyData?.kr_store_hash;
       const kr_product_id = parseInt(bodyData?.kr_product_id) || 0;
       const kr_product_variant = parseInt(bodyData?.kr_product_variant) || 0;
       const kr_product_price = bodyData?.kr_product_price;
       const quantity = parseInt(bodyData?.kr_store_form_data['qty[]']) || 1;
+      const bcCartId = bodyData?.cartId;
 
       const { modifierDisplayNames } = languageEN;
 
+      const kr_store_form_data = bodyData?.kr_store_form_data;
       const kr_design_data = bodyData?.krDesignData;
 
       //Return if product ID not found
@@ -161,7 +76,6 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       //Get modifiers Ids
       const modifierIds = await fetchFilteredModifierIds(kr_product_id, 50);
 
-
       //Final product price 
       const finallyCartPrice = kr_product_price;
 
@@ -192,9 +106,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           });
         }
       });
-      
-      //return res.status(200).json({ status: true, message: optionSelections });
-      
+
       //if product is no variant
       if(kr_product_variant == 0){
         const cartPayload = {
@@ -208,19 +120,60 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             }
           ]
         }
-        const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
-        return res.status(200).json({ status: true, message: cartResult });
+
+        if(bcCartId === null){
+          const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
+          return res.status(200).json({ status: true, message:"Success.", data: cartResult });
+        }else{
+          const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`, cartPayload);
+          return res.status(200).json({ status: true, message:"Success.", data: cartResult });
+        }
+
       }
 
+      //if product has variant
+      if(kr_product_variant > 0){
+
+        // Build optionSelections
+        const bcOptionSelections = Object.entries(kr_store_form_data)
+          .filter(([key, value]) => {
+            // skip unwanted keys
+            return key !== "product_id" && key !== "qty[]" && value !== "";
+          })
+          .map(([key, value]) => ({
+            option_id: parseInt(key, 10),
+            option_value: value,
+        }));
+
+        // Merge both
+        const finalOptionSelections = [...optionSelections, ...bcOptionSelections];
+
+        const cartPayload = {
+          "line_items": [
+            {
+              "quantity": quantity,
+              "product_id": kr_product_id,
+              "name": productTitle,
+              "list_price": finallyCartPrice,
+              "option_selections": finalOptionSelections
+            }
+          ]
+        }
+
+        if(bcCartId === null){
+          const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
+          return res.status(200).json({ status: true, message:"Success.", data: cartResult });
+        }else{
+          const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`, cartPayload);
+          return res.status(200).json({ status: true, message:"Success.", data: cartResult });
+        }
+
+      }
 
     } catch (error) {
-      console.log('error 1')
-      console.log(error)
       res.status(500).json({ status: false, message: error });
     }
   } catch (error) {
-    console.log('error 2')
-      console.log(error)
     const { message, response } = error;
     res.status(response?.status || 500).json({ status: false, message });
   }
