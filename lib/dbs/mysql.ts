@@ -181,7 +181,7 @@ export async function setScriptManager(session: SessionProps) {
   const scriptPayload = {
     "name": "KR Customizer",
     "description": "KR Customizer customizer app Script",
-    "html" : "<script>window.krcustomizer_config = { \"store_hash\" : \"{{settings.store_hash}}\", \"page_type\" : \"{{page_type}}\",\"storefront_api\" : \"{{settings.storefront_api.token}}\", \"product_id\" : \"{{product.id}}\", \"product_sku\" : \"{{product.sku}}\" }</script> <script src=\""+process?.env?.customizer_app_domain+"scripts/bigcommerce/product.js\" defer></script>",
+    "html" : "<script>window.krcustomizer_config = { \"store_hash\" : \"{{settings.store_hash}}\", \"channel_id\" : \"{{settings.channel_id}}\", \"currencyCode\" : \"{{settings.money.currency_token}}\",  \"page_type\" : \"{{page_type}}\",\"storefront_api\" : \"{{settings.storefront_api.token}}\", \"product_id\" : \"{{product.id}}\", \"product_sku\" : \"{{product.sku}}\" }</script> <script src=\""+process?.env?.customizer_app_domain+"scripts/bigcommerce/product.js\" defer></script>",
     "auto_uninstall": true,
     "load_method": "default",
     "location": "footer",

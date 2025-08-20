@@ -1,11 +1,12 @@
+
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V1');
+console.log('krAppConfig V5');
 console.log(krAppConfig);
 
 const bc_storefront_token = krAppConfig?.storefront_api;
 const kr_product_id = krAppConfig?.product_id;
 const kr_store_hash = krAppConfig?.store_hash;
-const kr_page_type = krAppConfig?.page_type;
+const kr_currencyCode = krAppConfig?.currencyCode;
 
 const kr_root_app_id = "kr-customizer-root";
 const ele_customize_handel_button = document?.querySelector('body .kr-customize-handel');
@@ -36,23 +37,13 @@ function appModelVisibility(action) {
 
 //Mount app
 document.addEventListener('DOMContentLoaded', function () {
-    if(kr_page_type === "product") {
-        if (!document.getElementById(kr_root_app_id)) {
-            document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
-        }
-        if (typeof window.mountProductCustomizer === 'function') {
-            window.mountProductCustomizer(`#${kr_root_app_id}`, {
-                productId: kr_product_id,
-                storeHash: kr_store_hash
-            });
-        } else {
-            console.error('Customizer failed to load');
-        }
+    if (!document.getElementById(kr_root_app_id)) {
+        document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
     }
 });
 
 //customize button Validation & handel
-ele_customize_handel_button?.addEventListener("click", function () {
+ele_customize_handel_button?.addEventListener("click", async function () {
     kr_store_form_data = {};
     appModelVisibility('hide');
 
@@ -89,6 +80,19 @@ ele_customize_handel_button?.addEventListener("click", function () {
     });
 
     appModelVisibility('show');
+
+    const productData = await productWithSelectedOptions(kr_store_form_data);
+    if (typeof window.mountProductCustomizer === 'function') {
+        window.mountProductCustomizer(`#${kr_root_app_id}`, {
+            currencyCode: "$",
+            productId: kr_product_id,
+            productPrice: productData?.kr_product_price,
+            storeHash: kr_store_hash
+        });
+    } else {
+        console.error('Customizer failed to load');
+    }
+
 
 });
 
@@ -146,7 +150,7 @@ async function productWithSelectedOptions(options) {
 
 //Add to Cart Handel
 document.addEventListener("click", async function (e) {
-    console.clear();
+    //console.clear();
     const addtocartButton = e.target.closest('[title="Add design to cart"]');
     if (addtocartButton) {
 
@@ -174,7 +178,7 @@ document.addEventListener("click", async function (e) {
 
         const productData = await productWithSelectedOptions(kr_store_form_data);
 
-        console.log('productData Final V1');
+        console.log('productData Final V2');
         console.log(productData)
 
     }
