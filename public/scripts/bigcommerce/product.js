@@ -1,6 +1,5 @@
-
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V5');
+console.log('krAppConfig V7');
 console.log(krAppConfig);
 
 const bc_storefront_token = krAppConfig?.storefront_api;
@@ -28,11 +27,9 @@ async function getCart() {
 
 //Root app model visibility
 function appModelVisibility(action) {
-    if (action === "show") {
-        document.getElementById(kr_root_app_id).style.display = 'block';
-    } else {
-        document.getElementById(kr_root_app_id).style.display = 'none';
-    }
+    const root = document.getElementById(kr_root_app_id);
+    if (!root) return;
+    root.style.display = action === "show" ? "block" : "none";
 }
 
 //Mount app
@@ -42,8 +39,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+function mountCustomizerApp(productData) {
+    if (typeof window.mountProductCustomizer === 'function') {
+        appModelVisibility('show');
+        window.mountProductCustomizer(`#${kr_root_app_id}`, {
+            currencyCode: kr_currencyCode,
+            productId: kr_product_id,
+            productPrice: productData?.kr_product_price,
+            storeHash: kr_store_hash
+        });
+    } else {
+        console.error("Customizer function not found.");
+    }
+}
+
 //customize button Validation & handel
 ele_customize_handel_button?.addEventListener("click", async function () {
+
     kr_store_form_data = {};
     appModelVisibility('hide');
 
@@ -62,6 +74,12 @@ ele_customize_handel_button?.addEventListener("click", async function () {
         return;
     }
 
+    // disable button + change text
+    ele_customize_handel_button.disabled = true;
+    const originalText = ele_customize_handel_button.innerText;
+    ele_customize_handel_button.innerText = "Loading...";
+
+
     // Collect all form data into an object
     const formData = new FormData(ele_product_form);
     formData.forEach(function (value, key) {
@@ -79,20 +97,31 @@ ele_customize_handel_button?.addEventListener("click", async function () {
         }
     });
 
-    appModelVisibility('show');
+    try {
+        const scriptAppUrl = "https://customizer-frontend-ten.vercel.app/bc-app/bc-customiser-app.umd.js";
+        const productData = await productWithSelectedOptions(kr_store_form_data);
 
-    const productData = await productWithSelectedOptions(kr_store_form_data);
-    if (typeof window.mountProductCustomizer === 'function') {
-        window.mountProductCustomizer(`#${kr_root_app_id}`, {
-            currencyCode: "$",
-            productId: kr_product_id,
-            productPrice: productData?.kr_product_price,
-            storeHash: kr_store_hash
-        });
-    } else {
-        console.error('Customizer failed to load');
+        //Mount App Start
+        if (!document.querySelector(`script[src="${scriptAppUrl}"]`)) {
+            const scriptEle = document.createElement("script");
+            scriptEle.src = scriptAppUrl;
+            scriptEle.type = "text/javascript";
+            scriptEle.async = true;
+            scriptEle.onload = () => {
+                mountCustomizerApp(productData);
+            };
+            document.head.appendChild(scriptEle);
+        } else {
+            mountCustomizerApp(productData);
+        }
+        //Mount App End
+
+    } catch (err) {
+        console.error(err);
+    } finally {
+        ele_customize_handel_button.disabled = false;
+        ele_customize_handel_button.innerText = originalText;
     }
-
 
 });
 
@@ -105,8 +134,6 @@ async function getProductVariantId(productData) {
         body: JSON.stringify({ query: `query product{ site{ product(sku:"${productData}"){ variants(skus:["${productData}"]){ edges{ node{ entityId } } } } } } ` })
     });
     const resultData = await responseReq?.json();
-    console.log('graphql getProducts')
-    console.log(resultData)
     if (resultData?.data?.site?.product && resultData?.data?.site?.product?.variants?.edges?.length > 0) {
         return resultData?.data?.site?.product?.variants?.edges[0]?.node?.entityId;
     } else {
@@ -183,3 +210,4 @@ document.addEventListener("click", async function (e) {
 
     }
 });
+
