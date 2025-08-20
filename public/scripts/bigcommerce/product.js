@@ -1,10 +1,11 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V7');
+console.log('krAppConfig V8');
 console.log(krAppConfig);
 
+const kr_store_hash = krAppConfig?.store_hash;
+const kr_page_type = krAppConfig?.page_type;
 const bc_storefront_token = krAppConfig?.storefront_api;
 const kr_product_id = krAppConfig?.product_id;
-const kr_store_hash = krAppConfig?.store_hash;
 const kr_currencyCode = krAppConfig?.currencyCode;
 
 const kr_root_app_id = "kr-customizer-root";
@@ -34,8 +35,10 @@ function appModelVisibility(action) {
 
 //Mount app
 document.addEventListener('DOMContentLoaded', function () {
-    if (!document.getElementById(kr_root_app_id)) {
-        document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
+    if(kr_page_type === "product"){
+        if (!document.getElementById(kr_root_app_id)) {
+            document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
+        }
     }
 });
 
