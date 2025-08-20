@@ -1,5 +1,5 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V8');
+console.log('krAppConfig V9');
 console.log(krAppConfig);
 
 const kr_store_hash = krAppConfig?.store_hash;
@@ -7,6 +7,7 @@ const kr_page_type = krAppConfig?.page_type;
 const bc_storefront_token = krAppConfig?.storefront_api;
 const kr_product_id = krAppConfig?.product_id;
 const kr_currencyCode = krAppConfig?.currencyCode;
+const kr_customer = krAppConfig?.customer;
 
 const kr_root_app_id = "kr-customizer-root";
 const ele_customize_handel_button = document?.querySelector('body .kr-customize-handel');
@@ -174,7 +175,7 @@ async function productWithSelectedOptions(options) {
     const cartData = await getCart();
     const cartId = cartData?.id || null;
 
-    return { kr_product_variant, kr_product_price, kr_product_id, kr_store_form_data, kr_store_hash, krDesignData, cartId: cartId };
+    return { kr_product_variant, kr_product_price, kr_product_id, kr_store_form_data, kr_store_hash, krDesignData, cartId: cartId, kr_customer };
 }
 
 
