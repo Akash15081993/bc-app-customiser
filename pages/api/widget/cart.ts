@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { bigcommerceClient } from "@lib/auth";
-//import { runCors } from "@lib/cors";
 import { mysqlQuery } from "@lib/dbs/mysql";
+import { runCors } from "@lib/cors";
 import languageEN from "lang/en";
 
 function base64UrlDecode(str: string) {
@@ -12,7 +12,8 @@ function base64UrlDecode(str: string) {
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
   
-  //if(runCors(req, res)) return; // handle preflight
+  //Apply CORS
+  if (runCors(req, res)) return;
 
   try {
     if (req.method === "GET") return res .status(405).json({ status: false, message: "Method not allowed" });
