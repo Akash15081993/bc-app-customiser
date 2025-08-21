@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { bigcommerceClient } from "@lib/auth";
-import { mysqlQuery } from "@lib/dbs/mysql";
 import { runCors } from "@lib/cors";
+import { mysqlQuery } from "@lib/dbs/mysql";
 import languageEN from "lang/en";
 
 function base64UrlDecode(str: string) {
