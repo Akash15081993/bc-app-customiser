@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { runCors } from "@lib/cors";
 import { bigcommerceClient } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
 import languageEN from "lang/en";
-import { runCors } from "@lib/cors";
 
 function base64UrlDecode(str: string) {
   return JSON.parse(
