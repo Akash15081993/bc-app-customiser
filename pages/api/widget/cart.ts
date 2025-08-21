@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { runCors } from "@lib/cors";
 import { bigcommerceClient } from "@lib/auth";
+import { runCors } from "@lib/cors";
 import { mysqlQuery } from "@lib/dbs/mysql";
 import languageEN from "lang/en";
 
