@@ -31,7 +31,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       const { modifierDisplayNames } = languageEN;
 
       const kr_store_form_data = bodyData?.kr_store_form_data;
-      const kr_design_data = bodyData?.krDesignData;
+      const kr_design_id = bodyData?.kr_design_id;
 
       if (!bc_storefront_token) {
         return res.status(400).json({ status: false, error: "Missing token" });
@@ -56,8 +56,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             .json({ status: false, message: "Product not exits." });
         }
 
-        //Return if design data not found
-        if (!kr_design_data) {
+        //Return if design id not found
+        if (!kr_design_id) {
           return res
             .status(200)
             .json({
@@ -67,10 +67,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             });
         }
 
-        const storeData = await mysqlQuery(
-          "SELECT  `accessToken` FROM `stores` WHERE `storeHash` = ?",
-          [kr_store_hash]
-        );
+        const storeData = await mysqlQuery("SELECT  `accessToken` FROM `stores` WHERE `storeHash` = ?", [kr_store_hash]);
         const authData = storeData[0]?.accessToken;
 
         //Return if user is not valid
@@ -134,16 +131,21 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         //Get modifiers Ids
         const modifierIds = await fetchFilteredModifierIds(kr_product_id, 50);
 
+        //Get Save product data
+        const productSaved = await mysqlQuery("SELECT  `product_data` FROM `productSaved` WHERE `id` = ?", [kr_design_id]);
+
+        if(productSaved?.length == 0){
+          return res.status(200).json({ status: false, message: "Product save not found." });
+        }
+
+        const productSaveResult = JSON.parse(productSaved[0]?.product_data);
+
         //Final product price
-        const finallyCartPrice = kr_product_price;
+        const finallyCartPrice = kr_product_price + parseFloat(productSaveResult?.customizations?.krCustomizedPrice);
 
         //krDesign Data
-        const designId = kr_design_data?.krDesignId;
-        const desginImage =
-          kr_design_data?.krImageURL?.length > 0
-            ? kr_design_data?.krImageURL[0]
-            : 0;
-        const designArea = JSON.stringify(kr_design_data?.krDesignArea);
+        const desginImage = productSaveResult?.screenshots?.length > 0 ? productSaveResult?.screenshots[0]?.url : 0;
+        const designArea = JSON.stringify(productSaveResult);
 
         // Build option selections
         const optionSelections: { option_id: number; option_value: any }[] = [];
@@ -151,7 +153,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           if (mod.name === modifierDisplayNames.designId) {
             optionSelections.push({
               option_id: mod.id,
-              option_value: designId,
+              option_value: kr_design_id,
             });
           }
           if (mod.name === modifierDisplayNames.viewDesign) {
