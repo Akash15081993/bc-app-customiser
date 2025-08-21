@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { runCors } from "@lib/cors";
+//import { runCors } from "@lib/cors";
 import { mysqlQuery } from "@lib/dbs/mysql";
 
 function base64UrlDecode(str: string) {
