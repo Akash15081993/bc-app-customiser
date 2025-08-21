@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-//import { runCors } from "@lib/cors";
 import { mysqlQuery } from "@lib/dbs/mysql";
+import { runCors } from "@lib/cors";
 
 function base64UrlDecode(str: string) {
   return JSON.parse(
@@ -10,7 +10,8 @@ function base64UrlDecode(str: string) {
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
-  //if(runCors(req, res)) return; // handle preflight
+  //Apply CORS
+  if (runCors(req, res)) return;
 
   try {
     if (req.method === "GET")
