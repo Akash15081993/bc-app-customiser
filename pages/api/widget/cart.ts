@@ -11,7 +11,9 @@ function base64UrlDecode(str: string) {
 }
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
-  if(runCors(req, res)) return; // handle preflight
+  
+  //if(runCors(req, res)) return; // handle preflight
+
   try {
     if (req.method === "GET") return res .status(405).json({ status: false, message: "Method not allowed" });
 
