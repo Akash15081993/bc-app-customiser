@@ -1,7 +1,8 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V9');
+console.log('krAppConfig V10');
 console.log(krAppConfig);
 
+const kr_endpoint = "https://app.krcustomizer.com/";
 const kr_store_hash = krAppConfig?.store_hash;
 const kr_page_type = krAppConfig?.page_type;
 const bc_storefront_token = krAppConfig?.storefront_api;
@@ -11,10 +12,50 @@ const kr_customer_id = krAppConfig?.customer_id;
 const kr_customer_email = krAppConfig?.customer_email;
 
 const kr_root_app_id = "kr-customizer-root";
-const ele_customize_handel_button = document?.querySelector('body .kr-customize-handel');
+const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" kr-customize-handel>Customize</button>`;
 const ele_addtocart_handel_button = document?.querySelector('body .kr-addtocart-handel');
 const ele_product_form = document?.querySelector('.productView-options form');
 let kr_store_form_data = {};
+
+function appendCSS(cssCode) {
+    const style = document.createElement("style");
+    style.innerHTML = cssCode;
+    document.head.appendChild(style);
+}
+
+async function appAuthentication() {
+    const bodyPaylod = { "kr_store_hash": kr_store_hash, "bc_storefront_token": bc_storefront_token };
+    const reqAuthentication = await fetch(`${kr_endpoint}api/widget/authentication`, {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify(bodyPaylod)
+    });
+    const resultAuthentication = await reqAuthentication?.json();
+    console.log('resultAuthentication')
+    console.log(resultAuthentication)
+
+    if (resultAuthentication?.status === true) {
+        const appSettings = resultAuthentication?.appSettings;
+        const cssCode = appSettings?.cssCode;
+        const designerButton = appSettings?.designerButton;
+        const enableShare = appSettings?.enableShare;
+
+        //Set custom css
+        if (cssCode != "") { appendCSS(cssCode); }
+
+        //Button append
+        const designerButtonEle = document.querySelector(designerButton);
+        if (designerButtonEle) {
+            designerButtonEle.insertAdjacentHTML('beforeend', customize_handel_button);
+        } else {
+            document.querySelector(".productView-options .form").insertAdjacentHTML('beforeend', customize_handel_button);
+        }
+
+    } else {
+        console.log("%c" + "Your subscription is not valid. Please contact to 'KR Customizer' administrator", "background: #79d000; color: #1d1d1d;padding:5px; border-radius:5px");
+    }
+}
+if (kr_page_type === "product") { appAuthentication(); }
 
 async function getCart() {
     const reqCart = await fetch('/api/storefront/cart?include=lineItems.digitalItems.options,lineItems.physicalItems.options', {
@@ -37,7 +78,7 @@ function appModelVisibility(action) {
 
 //Mount app
 document.addEventListener('DOMContentLoaded', function () {
-    if(kr_page_type === "product"){
+    if (kr_page_type === "product") {
         if (!document.getElementById(kr_root_app_id)) {
             document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
         }
@@ -50,86 +91,15 @@ function mountCustomizerApp(productData) {
         window.mountProductCustomizer(`#${kr_root_app_id}`, {
             currencyCode: kr_currencyCode,
             productId: kr_product_id,
-            productPrice: productData?.kr_product_price,
-            storeHash: kr_store_hash
+            productPrice: parseFloat(productData?.kr_product_price),
+            storeHash: kr_store_hash,
+            pageLoading: false,
+            productQuantity: parseInt(productData?.productQuantity),
         });
     } else {
         console.error("Customizer function not found.");
     }
 }
-
-//customize button Validation & handel
-ele_customize_handel_button?.addEventListener("click", async function () {
-
-    kr_store_form_data = {};
-    appModelVisibility('hide');
-
-    //Validation form
-    if (ele_product_form.checkValidity && !ele_product_form.checkValidity()) {
-        if (ele_product_form.reportValidity) {
-            ele_product_form.reportValidity();
-        } else {
-            // IE fallback
-            const firstInvalid = ele_product_form.querySelector(":invalid");
-            if (firstInvalid) {
-                alert("Please fill out all required fields.");
-                firstInvalid.focus();
-            }
-        }
-        return;
-    }
-
-    // disable button + change text
-    ele_customize_handel_button.disabled = true;
-    const originalText = ele_customize_handel_button.innerText;
-    ele_customize_handel_button.innerText = "Loading...";
-
-
-    // Collect all form data into an object
-    const formData = new FormData(ele_product_form);
-    formData.forEach(function (value, key) {
-        value = value?.trim?.() || ""; // remove spaces
-
-        // skip unwanted keys and empty values
-        if (key === "action" || value === "") { return; }
-
-        // Extract attribute id if key is like attribute[170]
-        const match = key.match(/^attribute\[(\d+)\]$/);
-        if (match) {
-            kr_store_form_data[match[1]] = value; // store only the number as key
-        } else {
-            kr_store_form_data[key] = value;
-        }
-    });
-
-    try {
-        const scriptAppUrl = "https://customizer-frontend-ten.vercel.app/bc-app/bc-customiser-app.umd.js";
-        const productData = await productWithSelectedOptions(kr_store_form_data);
-
-        //Mount App Start
-        if (!document.querySelector(`script[src="${scriptAppUrl}"]`)) {
-            const scriptEle = document.createElement("script");
-            scriptEle.src = scriptAppUrl;
-            scriptEle.type = "text/javascript";
-            scriptEle.async = true;
-            scriptEle.onload = () => {
-                mountCustomizerApp(productData);
-            };
-            document.head.appendChild(scriptEle);
-        } else {
-            mountCustomizerApp(productData);
-        }
-        //Mount App End
-
-    } catch (err) {
-        console.error(err);
-    } finally {
-        ele_customize_handel_button.disabled = false;
-        ele_customize_handel_button.innerText = originalText;
-    }
-
-});
-
 
 //Get product variant id
 async function getProductVariantId(productData) {
@@ -151,8 +121,14 @@ async function getProductVariantId(productData) {
 async function productWithSelectedOptions(options) {
     let query_parameters = ``;
     let optionEntity = ``;
+    let productQuantity = 1;
 
     Object.entries(options).forEach(([key, value]) => {
+
+        if (key === "qty[]") {
+            productQuantity = value
+        }
+
         // Skip unwanted keys and empty values
         if (key === "product_id" || key === "qty[]" || value === "" || isNaN(Number(value))) return;
         optionEntity += `{ optionEntityId: ${parseInt(key)}, valueEntityId: ${parseInt(value)} },`;
@@ -176,14 +152,141 @@ async function productWithSelectedOptions(options) {
     const cartData = await getCart();
     const cartId = cartData?.id || null;
 
-    return { kr_product_variant, kr_product_price, kr_product_id, kr_store_form_data, kr_store_hash, krDesignData, cartId: cartId, kr_customer_id };
+    return {
+        kr_product_variant,
+        kr_product_price,
+        kr_product_id,
+        kr_store_form_data,
+        kr_store_hash,
+        kr_customer_id,
+        kr_design_id: krDesignData?.krDesignId,
+        cartId,
+        productQuantity
+    };
+}
+
+
+//customize button Validation & handel
+document.addEventListener("click", async function (e) {
+    //console.clear();
+    const ele_customize_handel_button = e.target.closest('button[kr-customize-handel');
+    if (ele_customize_handel_button) {
+
+        kr_store_form_data = {};
+        appModelVisibility('hide');
+
+        //Validation form
+        if (ele_product_form.checkValidity && !ele_product_form.checkValidity()) {
+            if (ele_product_form.reportValidity) {
+                ele_product_form.reportValidity();
+            } else {
+                // IE fallback
+                const firstInvalid = ele_product_form.querySelector(":invalid");
+                if (firstInvalid) {
+                    alert("Please fill out all required fields.");
+                    firstInvalid.focus();
+                }
+            }
+            return;
+        }
+
+        // disable button + change text
+        ele_customize_handel_button.disabled = true;
+        const originalText = ele_customize_handel_button.innerText;
+        ele_customize_handel_button.innerText = "Loading...";
+
+
+        // Collect all form data into an object
+        const formData = new FormData(ele_product_form);
+        formData.forEach(function (value, key) {
+            value = value?.trim?.() || ""; // remove spaces
+
+            // skip unwanted keys and empty values
+            if (key === "action" || value === "") { return; }
+
+            // Extract attribute id if key is like attribute[170]
+            const match = key.match(/^attribute\[(\d+)\]$/);
+            if (match) {
+                kr_store_form_data[match[1]] = value; // store only the number as key
+            } else {
+                kr_store_form_data[key] = value;
+            }
+        });
+
+        try {
+            const scriptAppUrl = "https://customizer-frontend-ten.vercel.app/bc-app/bc-customiser-app.umd.js";
+            const productData = await productWithSelectedOptions(kr_store_form_data);
+
+            //Mount App Start
+            if (!document.querySelector(`script[src="${scriptAppUrl}"]`)) {
+                const scriptEle = document.createElement("script");
+                scriptEle.src = scriptAppUrl;
+                scriptEle.type = "text/javascript";
+                scriptEle.async = true;
+                scriptEle.onload = () => {
+                    mountCustomizerApp(productData);
+                };
+                document.head.appendChild(scriptEle);
+            } else {
+                mountCustomizerApp(productData);
+            }
+            //Mount App End
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setTimeout(() => {
+                ele_customize_handel_button.disabled = false;
+                ele_customize_handel_button.innerText = originalText;
+            }, 2000);
+        }
+
+    }
+})
+
+
+async function kr_addtocart(productData) {
+
+    console.clear();
+    console.log('kr_addtocart Init');
+    console.log(productData)
+
+    const bodyPaylod = {
+        "kr_customer_id": productData?.kr_customer_id,
+        "kr_product_variant": productData?.kr_product_variant,
+        "kr_product_price": productData?.kr_product_price,
+        "kr_product_id": productData?.kr_product_id,
+        "kr_store_form_data": productData?.kr_store_form_data,
+        "kr_store_hash": productData?.kr_store_hash,
+        "kr_design_id": productData?.kr_design_id,
+        "cartId": productData?.cartId,
+        "bc_storefront_token": bc_storefront_token
+    };
+
+    const reqCart = await fetch(`${kr_endpoint}api/widget/cart`, {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify(bodyPaylod)
+    });
+    const resultCart = await reqCart?.json();
+    console.log('resultCart')
+    console.log(resultCart)
+
+    if (resultCart?.status === true) {
+        console.log('YES')
+    } else {
+        console.log('NO')
+    }
+
+    window?.setCustomizerLoading(false);
+
 }
 
 
 //Add to Cart Handel
 document.addEventListener("click", async function (e) {
     //console.clear();
-    const addtocartButton = e.target.closest('[title="Add design to cart"]');
+    const addtocartButton = e.target.closest('button[data-kr-addtocart-handel]');
     if (addtocartButton) {
 
         //Validation form
@@ -202,6 +305,8 @@ document.addEventListener("click", async function (e) {
             return;
         }
 
+        window?.setCustomizerLoading(true);
+
         if (kr_store_form_data == null || (typeof kr_store_form_data === 'object' && Object.keys(kr_store_form_data).length === 0)) {
             appModelVisibility('hide');
             return false;
@@ -209,9 +314,9 @@ document.addEventListener("click", async function (e) {
         appModelVisibility('show');
 
         const productData = await productWithSelectedOptions(kr_store_form_data);
+        kr_addtocart(productData)
 
-        console.log('productData Final V2');
-        console.log(productData)
+
 
     }
 });

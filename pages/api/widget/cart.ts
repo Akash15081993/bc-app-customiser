@@ -189,17 +189,24 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
               `/carts?include=redirect_urls`,
               cartPayload
             );
-            return res
-              .status(200)
-              .json({ status: true, message: "Success.", data: cartResult });
+
+            if(cartResult?.data){
+              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+            }else{
+              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            }
+            
+
           } else {
-            const cartResult = await bigcommerce.post(
-              `/carts/${bcCartId}/items?include=redirect_urls`,
-              cartPayload
-            );
-            return res
-              .status(200)
-              .json({ status: true, message: "Success.", data: cartResult });
+            
+            const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`,cartPayload);
+            
+            if(cartResult?.data){
+              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+            }else{
+              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            }
+
           }
         }
 
@@ -240,17 +247,25 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
               `/carts?include=redirect_urls`,
               cartPayload
             );
-            return res
-              .status(200)
-              .json({ status: true, message: "Success.", data: cartResult });
+            
+            if(cartResult?.data){
+              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+            }else{
+              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            }
+            
           } else {
             const cartResult = await bigcommerce.post(
               `/carts/${bcCartId}/items?include=redirect_urls`,
               cartPayload
             );
-            return res
-              .status(200)
-              .json({ status: true, message: "Success.", data: cartResult });
+            
+            if(cartResult?.data){
+              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+            }else{
+              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            }
+            
           }
         }
       } else {
