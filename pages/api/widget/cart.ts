@@ -27,11 +27,12 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       const quantity = parseInt(bodyData?.kr_store_form_data["qty[]"]) || 1;
       const bcCartId = bodyData?.cartId;
       const bc_storefront_token = bodyData?.bc_storefront_token;
+      const kr_customer_id = bodyData?.kr_customer_id || 0;
 
       const { modifierDisplayNames } = languageEN;
 
       const kr_store_form_data = bodyData?.kr_store_form_data;
-      const kr_design_id = bodyData?.kr_design_id;
+      const kr_design_id = parseInt(bodyData?.kr_design_id);
 
       if (!bc_storefront_token) {
         return res.status(400).json({ status: false, error: "Missing token" });
@@ -57,7 +58,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         }
 
         //Return if design id not found
-        if (!kr_design_id) {
+        if (kr_design_id <= 0) {
           return res
             .status(200)
             .json({
@@ -173,6 +174,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         //if product is no variant
         if (kr_product_variant == 0) {
           const cartPayload = {
+            customer_id: kr_customer_id,
             line_items: [
               {
                 quantity: quantity,
@@ -223,6 +225,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           ];
 
           const cartPayload = {
+            customer_id: kr_customer_id,
             line_items: [
               {
                 quantity: quantity,
