@@ -1,5 +1,5 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V10');
+console.log('krAppConfig V11');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";
@@ -246,8 +246,6 @@ document.addEventListener("click", async function (e) {
 
 
 async function kr_addtocart(productData) {
-
-    console.clear();
     console.log('kr_addtocart Init');
     console.log(productData)
 
@@ -273,7 +271,11 @@ async function kr_addtocart(productData) {
     console.log(resultCart)
 
     if (resultCart?.status === true) {
+
+        const redirect_urls = resultCart?.data?.redirect_urls?.cart_url;
+        window.location.href = redirect_urls;
         console.log('YES')
+
     } else {
         console.log('NO')
     }
