@@ -27,10 +27,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       const quantity = parseInt(bodyData?.kr_store_form_data["qty[]"]) || 1;
       const bcCartId = bodyData?.cartId;
       const bc_storefront_token = bodyData?.bc_storefront_token;
-      const kr_customer_id = bodyData?.kr_customer_id || 0;
-
+      const kr_customer_id = parseInt(bodyData?.kr_customer_id) || 0;
       const { modifierDisplayNames } = languageEN;
-
       const kr_store_form_data = bodyData?.kr_store_form_data;
       const kr_design_id = parseInt(bodyData?.kr_design_id);
 
