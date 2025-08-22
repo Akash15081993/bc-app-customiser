@@ -21,6 +21,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
       const bodyData = req.body as any;
       const kr_store_hash = bodyData?.kr_store_hash;
+      const kr_product_sku = bodyData?.kr_product_sku || 0;
       const kr_product_id = parseInt(bodyData?.kr_product_id) || 0;
       const kr_product_variant = parseInt(bodyData?.kr_product_variant) || 0;
       const kr_product_price = bodyData?.kr_product_price;
@@ -79,11 +80,21 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         //Connect with bc
         const bigcommerce = bigcommerceClient(authData, kr_store_hash);
 
-        //Get product
-        const productResult = await bigcommerce.get(
-          `/catalog/products/${kr_product_id}?include_fields=name`
-        );
-        const productTitle = productResult?.data?.name;
+        //Get product 
+        const productResult = await bigcommerce.get(`/catalog/products/?keyword=${kr_product_sku}&include_fields=name,inventory_level,inventory_tracking`);
+        if(productResult?.data?.length == 0){
+          return res.status(200).json({ status: false, message: "Product not found.", data: null });  
+        }
+
+        const productData = productResult?.data[0];
+        const productTitle = productData?.name;
+        const productInventory = productData?.inventory_level;
+        const productinventory_tracking = productData?.inventory_tracking;
+
+        //Check Inventory
+        if(productinventory_tracking != "none" && quantity > productInventory){
+          return res.status(200).json({ status: true, message: "We don't have enough "+productTitle+" stock on hand for the quantity you selected. Please try again.", data: productData });
+        }
 
         //Get product modifiers
         const fetchFilteredModifierIds = async (
@@ -185,17 +196,9 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           };
 
           if (bcCartId === null) {
-            const cartResult = await bigcommerce.post(
-              `/carts?include=redirect_urls`,
-              cartPayload
-            );
 
-            if(cartResult?.data){
-              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
-            }else{
-              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
-            }
-            
+            const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
+            return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
 
           } else {
             

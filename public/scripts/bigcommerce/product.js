@@ -1,5 +1,5 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig 12');
+console.log('krAppConfig 13');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";
@@ -167,6 +167,7 @@ async function productWithSelectedOptions(options) {
     const cartId = cartData?.id || null;
 
     return {
+        kr_product_sku: sku,
         kr_product_variant,
         kr_product_price,
         kr_product_id,
@@ -272,6 +273,7 @@ async function kr_addtocart(productData) {
     console.log(productData)
 
     const bodyPaylod = {
+        "kr_product_sku": productData?.kr_product_sku,
         "kr_customer_id": productData?.kr_customer_id,
         "kr_product_variant": productData?.kr_product_variant,
         "kr_product_price": productData?.kr_product_price,
@@ -293,16 +295,13 @@ async function kr_addtocart(productData) {
     console.log(resultCart)
 
     if (resultCart?.status === true) {
-
         const redirect_urls = resultCart?.data?.redirect_urls?.cart_url;
         window.location.href = redirect_urls;
-        console.log('YES')
-
+        setTimeout(() => { window?.setCustomizerLoading(false); }, 2000);
     } else {
-        console.log('NO')
+        appModelVisibility('hide');
+        window?.setCustomizerLoading(false);
     }
-
-    window?.setCustomizerLoading(false);
 
 }
 
