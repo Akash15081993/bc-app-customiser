@@ -1,6 +1,6 @@
 
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig 15');
+console.log('krAppConfig 20');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";
@@ -72,9 +72,6 @@ async function appAuthentication() {
         body: JSON.stringify(bodyPaylod)
     });
     const resultAuthentication = await reqAuthentication?.json();
-
-    console.log('resultAuthentication')
-    console.log(resultAuthentication)
 
     if (resultAuthentication?.status === true) {
         const appSettings = resultAuthentication?.appSettings;
@@ -226,7 +223,6 @@ function validateForm(form) {
 
 //customize button Validation & handel
 document.addEventListener("click", async function (e) {
-    //console.clear();
     const ele_customize_handel_button = e.target.closest('button[data-kr-customize-handel]');
     if (ele_customize_handel_button) {
 
@@ -329,7 +325,6 @@ async function kr_addtocart(productData) {
 
 //Add to Cart Handel
 document.addEventListener("click", async function (e) {
-    //console.clear();
     const addtocartButton = e.target.closest('button[data-kr-addtocart-handel]');
     if (addtocartButton) {
 
@@ -429,5 +424,83 @@ if (kr_page_type == "cart") {
             }
         });
         parentObserver.observe(parent, { childList: true });
+    });
+}
+
+
+//Checkout updateCartItems
+function updateCheckoutImages() {
+    document.querySelectorAll(".productList-item").forEach(item => {
+        const options = item.querySelectorAll(".product-option");
+        let designUrl = null;
+
+        options.forEach(opt => {
+            const text = opt.textContent.trim();
+
+            // Grab "View Design" URL
+            if (text.toLowerCase().startsWith("view design")) {
+                const parts = text.split(" ");
+                designUrl = parts[parts.length - 1]; // last part = URL
+                opt.style.display = "none"; // hide this row
+            }
+
+            // Hide "Design Id" & "Design Area"
+            if (
+                text.toLowerCase().startsWith("design id") ||
+                text.toLowerCase().startsWith("design area")
+            ) {
+                opt.style.display = "none";
+            }
+        });
+
+        // Replace product thumbnail
+        if (designUrl) {
+            const figure = item.querySelector(".product-figure");
+            if (figure && !figure.querySelector("img.custom-design")) {
+                figure.innerHTML = ""; // remove old image
+                const newImg = document.createElement("img");
+                newImg.src = designUrl;
+                newImg.alt = "Custom Design";
+                newImg.className = "custom-design";
+                newImg.style.maxWidth = "100%";
+                newImg.style.height = "auto";
+                figure.appendChild(newImg);
+            }
+        }
+    });
+}
+
+if (kr_page_type == "checkout") {
+    document.addEventListener("DOMContentLoaded", () => {
+        updateCheckoutImages();
+
+        //for desktop
+        const checkoutContainerDesktop = document.querySelector("#checkout-app") || document.body;
+        if (checkoutContainerDesktop) {
+            const observer = new MutationObserver(() => {
+                updateCheckoutImages();
+            });
+            observer.observe(checkoutContainerDesktop, { childList: true, subtree: true });
+        }
+
+        //for mobile
+        const checkoutContainerMobile = document.querySelector(".ReactModalPortal") || document.body;
+        if (checkoutContainerMobile) {
+            const observer = new MutationObserver(() => {
+                updateCheckoutImages();
+            });
+            observer.observe(checkoutContainerMobile, { childList: true, subtree: true });
+        }
+
+        // Handle "See All" button
+        document.addEventListener("click", e => {
+            const btn = e.target.closest("button");
+            if (btn && btn.textContent.trim().startsWith("See All")) {
+                setTimeout(() => {
+                    updateCheckoutImages();
+                }, 500);
+            }
+        });
+
     });
 }
