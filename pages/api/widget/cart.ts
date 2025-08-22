@@ -151,7 +151,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         const productSaveResult = JSON.parse(productSaved[0]?.product_data);
 
         //Final product price
-        const finallyCartPrice = kr_product_price + parseFloat(productSaveResult?.customizations?.krCustomizedPrice);
+        const finallyCartPrice = parseFloat(kr_product_price) + (parseFloat(productSaveResult?.customizations?.krCustomizedPrice) || 0);
 
         //krDesign Data
         const desginImage = productSaveResult?.screenshots?.length > 0 ? productSaveResult?.screenshots[0]?.url : 0;
@@ -197,17 +197,23 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
           if (bcCartId === null) {
 
-            const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
-            return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+            try {
+              const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
+              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+            } catch (error) {
+              const errorMessage = JSON.parse(error?.responseBody).title || error;
+              return res.status(200).json({ status: false, message: errorMessage  });
+            }
+
 
           } else {
-            
-            const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`,cartPayload);
-            
-            if(cartResult?.data){
+
+            try {
+              const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`,cartPayload);
               return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
-            }else{
-              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            } catch (error) {
+              const errorMessage = JSON.parse(error?.responseBody).title || error;
+              return res.status(200).json({ status: false, message: errorMessage  });
             }
 
           }
@@ -246,31 +252,28 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           };
 
           if (bcCartId === null) {
-            const cartResult = await bigcommerce.post(
-              `/carts?include=redirect_urls`,
-              cartPayload
-            );
-            
-            if(cartResult?.data){
+
+            try {
+              const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`,cartPayload);
               return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
-            }else{
-              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            } catch (error) {
+              const errorMessage = JSON.parse(error?.responseBody).title || error;
+              return res.status(200).json({ status: false, message: errorMessage  });
             }
             
           } else {
-            const cartResult = await bigcommerce.post(
-              `/carts/${bcCartId}/items?include=redirect_urls`,
-              cartPayload
-            );
-            
-            if(cartResult?.data){
+
+            try {
+              const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`,cartPayload);
               return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
-            }else{
-              return res.status(200).json({ status: false, message: "Success.", data: cartResult });
+            } catch (error) {
+              const errorMessage = JSON.parse(error?.responseBody).title || error;
+              return res.status(200).json({ status: false, message: errorMessage  });
             }
             
           }
         }
+
       } else {
         return res.status(401).json({
           status: false,

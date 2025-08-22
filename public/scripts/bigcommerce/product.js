@@ -1,5 +1,5 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig 14');
+console.log('krAppConfig 15');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";
@@ -24,7 +24,7 @@ function krSetAlert(message, action) {
     }
     const eleMesage = `<div class="kr-alert-box ${otherClass}"><p>${message}</p><button>X</button></p>`;
     document.body.insertAdjacentHTML('beforeend', eleMesage);
-
+    
     document.querySelectorAll(".kr-alert-box").forEach(alertBox => {
         alertBox.addEventListener("click", function () {
             this.remove();
