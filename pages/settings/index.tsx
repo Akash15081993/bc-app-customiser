@@ -33,7 +33,7 @@ const Settings = () => {
 
   const getSettings = async () => {
     if (encodedContext == "") {
-      //router.push("unthorization-error");
+      router.push("unthorization-error");
       setSaveButtonLoading(false);
       return;
     }

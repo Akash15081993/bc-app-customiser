@@ -1,3 +1,4 @@
+
 const krAppConfig = window?.krcustomizer_config;
 console.log('krAppConfig 15');
 console.log(krAppConfig);
@@ -12,7 +13,6 @@ const kr_customer_id = krAppConfig?.customer_id;
 const kr_customer_email = krAppConfig?.customer_email;
 
 const kr_root_app_id = "kr-customizer-root";
-const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" data-kr-customize-handel>Customize</button>`;
 const ele_product_form = document.querySelector('.productView-options form') || document.querySelector('form[action*="/cart.php"]') || document.querySelector('form[data-cart-item-add]');
 let kr_store_form_data = {};
 
@@ -24,7 +24,7 @@ function krSetAlert(message, action) {
     }
     const eleMesage = `<div class="kr-alert-box ${otherClass}"><p>${message}</p><button>X</button></p>`;
     document.body.insertAdjacentHTML('beforeend', eleMesage);
-    
+
     document.querySelectorAll(".kr-alert-box").forEach(alertBox => {
         alertBox.addEventListener("click", function () {
             this.remove();
@@ -73,11 +73,17 @@ async function appAuthentication() {
     });
     const resultAuthentication = await reqAuthentication?.json();
 
+    console.log('resultAuthentication')
+    console.log(resultAuthentication)
+
     if (resultAuthentication?.status === true) {
         const appSettings = resultAuthentication?.appSettings;
         const cssCode = appSettings?.cssCode;
         const designerButton = appSettings?.designerButton;
+        const designerButtonName = appSettings?.designerButtonName != "" ? appSettings?.designerButtonName : "Customize";
         const enableShare = appSettings?.enableShare;
+
+        const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" data-kr-customize-handel>${designerButtonName}</button>`;
 
         //Set custom css
         if (cssCode != "") { appendCSS(cssCode); }
@@ -285,8 +291,6 @@ document.addEventListener("click", async function (e) {
 
 //Product add to cart
 async function kr_addtocart(productData) {
-    console.log('kr_addtocart Init');
-    console.log(productData)
 
     const bodyPaylod = {
         "kr_product_sku": productData?.kr_product_sku,
@@ -307,8 +311,6 @@ async function kr_addtocart(productData) {
         body: JSON.stringify(bodyPaylod)
     });
     const resultCart = await reqCart?.json();
-    console.log('resultCart')
-    console.log(resultCart)
 
     if (resultCart?.status === true) {
         const redirect_urls = resultCart?.data?.redirect_urls?.cart_url;
@@ -347,3 +349,85 @@ document.addEventListener("click", async function (e) {
 
     }
 });
+
+
+//Cart updateCartItems
+function updateCartItems() {
+    document.querySelectorAll(".cart-item").forEach(item => {
+        const dl = item.querySelector(".definitionList");
+        if (!dl) return;
+
+        dl.querySelectorAll("dt").forEach(dt => {
+            const label = dt.textContent.trim().toLowerCase();
+
+            if (label === "view design:") {
+                const dd = dt.nextElementSibling;
+                if (dd) {
+                    const designUrl = dd.textContent.trim();
+
+                    if (designUrl) {
+                        const figure = item.querySelector(".cart-item-figure");
+                        if (figure) {
+                            // remove old image
+                            figure.innerHTML = "";
+
+                            // append new image
+                            const newImg = document.createElement("img");
+                            newImg.src = designUrl;
+                            newImg.alt = "Custom Design";
+                            newImg.style.maxWidth = "100%";
+                            figure.appendChild(newImg);
+                        }
+                    }
+
+                    // hide row + change link
+                    dt.style.display = "none";
+                    dd.style.display = "none";
+                    const changeLink = item.querySelector('[data-item-edit]');
+                    if (changeLink) changeLink.style.display = "none";
+                }
+            }
+
+            if (["design id:", "design area:"].includes(label)) {
+                const dd = dt.nextElementSibling;
+                if (dd) dd.style.display = "none";
+                dt.style.display = "none";
+            }
+        });
+    });
+}
+
+//Cart initCartObserver
+function initCartObserver() {
+    const cartContainer = document.querySelector('.cart');
+    if (!cartContainer) return;
+
+    let timeout;
+    const observer = new MutationObserver(() => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            updateCartItems();
+        }, 150);
+    });
+    observer.observe(cartContainer, { childList: true, subtree: true });
+    return observer;
+}
+
+if (kr_page_type == "cart") {
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCartItems();
+        //Watch parent of cart so if .cart gets replaced → reattach observer
+        const parent = document.querySelector('.cart')?.parentNode;
+        if (!parent) return;
+        let cartObserver = initCartObserver();
+        const parentObserver = new MutationObserver(() => {
+            const newCart = document.querySelector('.cart');
+            if (newCart && (!cartObserver || !newCart.isSameNode(cartObserver.target))) {
+                if (cartObserver) cartObserver.disconnect();
+                cartObserver = initCartObserver();
+                updateCartItems();
+            }
+        });
+        parentObserver.observe(parent, { childList: true });
+    });
+}
