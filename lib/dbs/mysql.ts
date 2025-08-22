@@ -1,6 +1,7 @@
 import mysql, { PoolOptions } from "mysql2";
 import { promisify } from "util";
 import { bigcommerceClient } from "@lib/auth";
+import { getScriptPayload } from "lang/scriptPayload";
 import { SessionProps, StoreData } from "../../types";
 
 const MYSQL_CONFIG: PoolOptions = {
@@ -75,8 +76,7 @@ export async function setStore(session: SessionProps) {
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
-  console.warn('DONE setLoginMaster');
-
+  
 }
 
 // Use setStoreUser for storing store specific variables
@@ -124,6 +124,7 @@ export async function setStoreUser(session: SessionProps) {
       });
     }
   }
+
 }
 
 export async function deleteUser({ context, user, sub }: SessionProps) {
@@ -178,20 +179,10 @@ export async function setScriptManager(session: SessionProps) {
   //   "consent_category": "essential",
   //   "enabled": true
   // };
-  const scriptPayload = {
-    "name": "KR Customizer",
-    "description": "KR Customizer customizer app Script",
-    "html" : "<script>window.krcustomizer_config = { \"store_hash\" : \"{{settings.store_hash}}\", \"channel_id\" : \"{{settings.channel_id}}\", \"currencyCode\" : \"{{settings.money.currency_token}}\", \"page_type\" : \"{{page_type}}\", \"storefront_api\" : \"{{settings.storefront_api.token}}\", \"customer_id\" : \"{{#if customer}}{{customer.id}}{{else}}0{{/if}}\", \"customer_email\" : \"{{#if customer}}{{customer.email}}{{else}}0{{/if}}\", \"product_id\" : \"{{product.id}}\", \"product_sku\" : \"{{product.sku}}\" }</script> <script src=\""+process?.env?.customizer_app_domain+"scripts/bigcommerce/product.js\" defer></script>",
-    "auto_uninstall": true,
-    "load_method": "default",
-    "location": "footer",
-    "visibility": "all_pages",
-    "kind": "script_tag",
-    "consent_category": "essential",
-    "enabled": true
-  };
+  const scriptPayload = getScriptPayload(process.env.customizer_app_domain);
   
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   await bigcommerce.post(`/content/scripts`, scriptPayload);
+
 }
