@@ -1,5 +1,5 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig 13');
+console.log('krAppConfig 14');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";
@@ -15,6 +15,22 @@ const kr_root_app_id = "kr-customizer-root";
 const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" data-kr-customize-handel>Customize</button>`;
 const ele_product_form = document.querySelector('.productView-options form') || document.querySelector('form[action*="/cart.php"]') || document.querySelector('form[data-cart-item-add]');
 let kr_store_form_data = {};
+
+//set Alertbox
+function krSetAlert(message, action) {
+    let otherClass = ""
+    if (action == "error") {
+        otherClass = "kr-alert-box--error";
+    }
+    const eleMesage = `<div class="kr-alert-box ${otherClass}"><p>${message}</p><button>X</button></p>`;
+    document.body.insertAdjacentHTML('beforeend', eleMesage);
+
+    document.querySelectorAll(".kr-alert-box").forEach(alertBox => {
+        alertBox.addEventListener("click", function () {
+            this.remove();
+        });
+    });
+}
 
 //Hide kr fields
 function hideFields() {
@@ -301,6 +317,10 @@ async function kr_addtocart(productData) {
     } else {
         appModelVisibility('hide');
         window?.setCustomizerLoading(false);
+        setTimeout(() => {
+            const message = resultCart?.message;
+            krSetAlert(message, 'error');
+        }, 200);
     }
 
 }
