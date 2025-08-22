@@ -1,5 +1,5 @@
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig V11');
+console.log('krAppConfig 12');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";
@@ -12,17 +12,42 @@ const kr_customer_id = krAppConfig?.customer_id;
 const kr_customer_email = krAppConfig?.customer_email;
 
 const kr_root_app_id = "kr-customizer-root";
-const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" kr-customize-handel>Customize</button>`;
-const ele_addtocart_handel_button = document?.querySelector('body .kr-addtocart-handel');
-const ele_product_form = document?.querySelector('.productView-options form');
+const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" data-kr-customize-handel>Customize</button>`;
+const ele_product_form = document.querySelector('.productView-options form') || document.querySelector('form[action*="/cart.php"]') || document.querySelector('form[data-cart-item-add]');
 let kr_store_form_data = {};
 
+//Hide kr fields
+function hideFields() {
+    var hideLabels = ["design id", "view design", "design area"];
+    document.querySelectorAll(".form-field").forEach(function (field) {
+        var label = field.querySelector("label");
+        if (label) {
+            var text = label.textContent.replace(/\s+/g, " ").trim().toLowerCase();
+            if (hideLabels.some(l => text.includes(l))) {
+                field.style.display = "none";
+            }
+        }
+    });
+}
+
+//Mount app
+document.addEventListener('DOMContentLoaded', function () {
+    if (kr_page_type === "product") {
+        hideFields();
+        if (!document.getElementById(kr_root_app_id)) {
+            document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
+        }
+    }
+});
+
+//Set custom css
 function appendCSS(cssCode) {
     const style = document.createElement("style");
     style.innerHTML = cssCode;
     document.head.appendChild(style);
 }
 
+//App authentication
 async function appAuthentication() {
     const bodyPaylod = { "kr_store_hash": kr_store_hash, "bc_storefront_token": bc_storefront_token };
     const reqAuthentication = await fetch(`${kr_endpoint}api/widget/authentication`, {
@@ -31,8 +56,6 @@ async function appAuthentication() {
         body: JSON.stringify(bodyPaylod)
     });
     const resultAuthentication = await reqAuthentication?.json();
-    console.log('resultAuthentication')
-    console.log(resultAuthentication)
 
     if (resultAuthentication?.status === true) {
         const appSettings = resultAuthentication?.appSettings;
@@ -76,15 +99,7 @@ function appModelVisibility(action) {
     root.style.display = action === "show" ? "block" : "none";
 }
 
-//Mount app
-document.addEventListener('DOMContentLoaded', function () {
-    if (kr_page_type === "product") {
-        if (!document.getElementById(kr_root_app_id)) {
-            document.body.insertAdjacentHTML('beforeend', `<div id="${kr_root_app_id}" style="display:none;position: fixed;top: 0;left:0;width:100%;z-index: 9999999999;"></div>`);
-        }
-    }
-});
-
+//Mount app pass data
 function mountCustomizerApp(productData) {
     if (typeof window.mountProductCustomizer === 'function') {
         appModelVisibility('show');
@@ -115,7 +130,6 @@ async function getProductVariantId(productData) {
         return 0;
     }
 }
-
 
 //Get product details based on selected options
 async function productWithSelectedOptions(options) {
@@ -165,36 +179,44 @@ async function productWithSelectedOptions(options) {
     };
 }
 
+//customize root hide
+document.addEventListener("click", async function (e) {
+    const ele_close_handle = e.target.closest('button[data-kr-close-handle]');
+    if (ele_close_handle) { appModelVisibility('hide'); }
+})
+
+//Validation bc form
+function validateForm(form) {
+    if (form.checkValidity && !form.checkValidity()) {
+        if (form.reportValidity) form.reportValidity();
+        else {
+            const firstInvalid = form.querySelector(":invalid");
+            if (firstInvalid) {
+                alert("Please fill out all required fields.");
+                firstInvalid.focus();
+            }
+        }
+        return false;
+    }
+    return true;
+}
 
 //customize button Validation & handel
 document.addEventListener("click", async function (e) {
     //console.clear();
-    const ele_customize_handel_button = e.target.closest('button[kr-customize-handel');
+    const ele_customize_handel_button = e.target.closest('button[data-kr-customize-handel]');
     if (ele_customize_handel_button) {
 
         kr_store_form_data = {};
         appModelVisibility('hide');
 
         //Validation form
-        if (ele_product_form.checkValidity && !ele_product_form.checkValidity()) {
-            if (ele_product_form.reportValidity) {
-                ele_product_form.reportValidity();
-            } else {
-                // IE fallback
-                const firstInvalid = ele_product_form.querySelector(":invalid");
-                if (firstInvalid) {
-                    alert("Please fill out all required fields.");
-                    firstInvalid.focus();
-                }
-            }
-            return;
-        }
+        if (!validateForm(ele_product_form)) return;
 
         // disable button + change text
         ele_customize_handel_button.disabled = true;
         const originalText = ele_customize_handel_button.innerText;
         ele_customize_handel_button.innerText = "Loading...";
-
 
         // Collect all form data into an object
         const formData = new FormData(ele_product_form);
@@ -244,7 +266,7 @@ document.addEventListener("click", async function (e) {
     }
 })
 
-
+//Product add to cart
 async function kr_addtocart(productData) {
     console.log('kr_addtocart Init');
     console.log(productData)
@@ -284,7 +306,6 @@ async function kr_addtocart(productData) {
 
 }
 
-
 //Add to Cart Handel
 document.addEventListener("click", async function (e) {
     //console.clear();
@@ -292,20 +313,7 @@ document.addEventListener("click", async function (e) {
     if (addtocartButton) {
 
         //Validation form
-        if (ele_product_form.checkValidity && !ele_product_form.checkValidity()) {
-            appModelVisibility('hide');
-            if (ele_product_form.reportValidity) {
-                ele_product_form.reportValidity();
-            } else {
-                // IE fallback
-                const firstInvalid = ele_product_form.querySelector(":invalid");
-                if (firstInvalid) {
-                    alert("Please fill out all required fields.");
-                    firstInvalid.focus();
-                }
-            }
-            return;
-        }
+        if (!validateForm(ele_product_form)) return;
 
         window?.setCustomizerLoading(true);
 
@@ -318,8 +326,5 @@ document.addEventListener("click", async function (e) {
         const productData = await productWithSelectedOptions(kr_store_form_data);
         kr_addtocart(productData)
 
-
-
     }
 });
-
