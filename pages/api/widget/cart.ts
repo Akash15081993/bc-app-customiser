@@ -93,7 +93,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
         //Check Inventory
         if(productinventory_tracking != "none" && quantity > productInventory){
-          return res.status(200).json({ status: true, message: "We don't have enough "+productTitle+" stock on hand for the quantity you selected. Please try again.", data: productData });
+          return res.status(200).json({ status: false, message: "We don't have enough "+productTitle+" stock on hand for the quantity you selected. Please try again.", data: productData });
         }
 
         //Get product modifiers
