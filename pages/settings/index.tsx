@@ -20,6 +20,7 @@ const MAX_LENGTH = 5000;
 const Settings = () => {
   const encodedContext = useSession()?.context;
   const [enableShare, setEnableShare] = useState(false);
+  const [designerButtonName, setDesignerButtonName] = useState("Customize");
   const [designerButton, setDesignerButton] = useState("");
   const initialCss = `.example-css-custom{color:red;}`;
   const [cssCode, setCssCode] = useState(initialCss);
@@ -28,48 +29,49 @@ const Settings = () => {
 
   const [pageSuccess, setPageSuccess] = useState("");
   const [pageError, setPageError] = useState("");
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const getSettings = async () => {
-    if(encodedContext == "") {
-      router.push('unthorization-error')
+    if (encodedContext == "") {
+      //router.push("unthorization-error");
       setSaveButtonLoading(false);
-      
-return;
+      return;
     }
-    const reqSettings = await fetch(`/api/server/settings/get?context=${encodedContext}`,{
+    const reqSettings = await fetch(
+      `/api/server/settings/get?context=${encodedContext}`,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: null,
       }
     );
     const resultSettings = await reqSettings.json();
-    if(resultSettings?.status == true && resultSettings?.data != null){
-      setEnableShare(resultSettings?.data?.enableShare)
-      setDesignerButton(resultSettings?.data?.designerButton)
-      setCssCode(resultSettings?.data?.cssCode)
+    if (resultSettings?.status == true && resultSettings?.data != null) {
+      setEnableShare(resultSettings?.data?.enableShare);
+      setDesignerButtonName(resultSettings?.data?.designerButtonName);
+      setDesignerButton(resultSettings?.data?.designerButton);
+      setCssCode(resultSettings?.data?.cssCode);
     }
-    setSaveButtonLoading(false)
+    setSaveButtonLoading(false);
+  };
 
-  }
-
-  useEffect( ()=>{
+  useEffect(() => {
     getSettings();
-  },[encodedContext]);
+  }, [encodedContext]);
 
   const handleChange = () => setEnableShare(!enableShare);
 
   const handleSaveData = async () => {
     setSaveButtonLoading(true);
-    setPageError('')
-    setPageSuccess('');
+    setPageError("");
+    setPageSuccess("");
 
     const setSettings = await fetch(
       `/api/server/settings/add?context=${encodedContext}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enableShare, designerButton, cssCode }),
+        body: JSON.stringify({ enableShare, designerButtonName, designerButton, cssCode }),
       }
     );
 
@@ -79,12 +81,11 @@ return;
 
     if (getSettings?.status == false) {
       setPageError(getSettings?.message);
-      
-return;
+
+      return;
     }
 
     setPageSuccess("General settings updated successfully.");
-
   };
 
   const validateCss = (value: string) => {
@@ -95,16 +96,16 @@ return;
     // Basic SQL injection patterns (not foolproof, but helpful)
     const sqlKeywords = /(insert|update|delete|drop|union|--)/i;
     if (sqlKeywords.test(value)) {
-      return 'Invalid content detected in CSS (SQL keywords not allowed)';
+      return "Invalid content detected in CSS (SQL keywords not allowed)";
     }
 
     // Optional: block @import or javascript: URLs
     const dangerousPatterns = /(@import|javascript:|expression\()/i;
     if (dangerousPatterns.test(value)) {
-      return 'Unsafe CSS detected (e.g., @import or javascript:)';
+      return "Unsafe CSS detected (e.g., @import or javascript:)";
     }
 
-    return ''; // No error
+    return ""; // No error
   };
 
   const handleChangeCssCode = (value: string) => {
@@ -143,19 +144,38 @@ return;
 
       <Panel>
         <Flex justifyContent="space-between">
-          Enable share button <Switch checked={enableShare} onChange={handleChange} />
+          Enable share button{" "} (Coming Soon)
+          
+          <Switch disabled checked={enableShare} onChange={handleChange} />
         </Flex>
       </Panel>
 
       <Panel>
         <Input
-          label="Custom selector for Designer Button"
+          label="Customize button name"
+          description="The 'Customize' name will be displayed by default if you don't specify a button name."
+          name="name"
+          required
+          value={designerButtonName}
+          placeholder="Example: .add-to-cart-buttons"
+          width="small"
+          maxLength={30}
+          onChange={(e) => {
+            setDesignerButtonName(e.target.value);
+          }}
+        />
+      </Panel>
+
+      <Panel>
+        <Input
+          label="Custom selector for Customize Designer button"
           description="Enter the class or ID of the location where you want the button (if using a custom theme)."
           name="name"
           required
           value={designerButton}
           placeholder="Example: .add-to-cart-buttons"
           width="small"
+          maxLength={200}
           onChange={(e) => {
             setDesignerButton(e.target.value);
           }}
@@ -173,20 +193,20 @@ return;
             handleChangeCssCode(value);
           }}
         />
-        {error && <p style={{ color: 'red', marginTop: 8 }}>{error}</p>}
+        {error && <p style={{ color: "red", marginTop: 8 }}>{error}</p>}
       </Panel>
 
-        {!error && (
-            <Box style={{ margin: "20px 0 0 0" }}>
-                <Button
-                variant="primary"
-                onClick={handleSaveData}
-                isLoading={saveButtonLoading}
-                >
-                <AddIcon /> Save
-                </Button>
-            </Box>
-        )}
+      {!error && (
+        <Box style={{ margin: "20px 0 0 0" }}>
+          <Button
+            variant="primary"
+            onClick={handleSaveData}
+            isLoading={saveButtonLoading}
+          >
+            <AddIcon /> Save
+          </Button>
+        </Box>
+      )}
     </Panel>
   );
 };

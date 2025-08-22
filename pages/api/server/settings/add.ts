@@ -10,7 +10,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         .json({ status: false, message: "Method not allowed" });
 
     try {
-      const { enableShare, designerButton, cssCode } = req.body;
+      const { enableShare, designerButtonName, designerButton, cssCode } = req.body;
       const { storeHash, user } = await getSession(req);
 
       if (!user) return res.status(401).json({ error: "Unauthorized" });
@@ -35,6 +35,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         storeHash,
         userId: user?.id,
         enableShare,
+        designerButtonName,
         designerButton,
         cssCode: safeCss,
       };
