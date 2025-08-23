@@ -72,18 +72,36 @@ export default async function handler(
     );
     const bcOrder = allOrders[allOrders.length - 1];
 
-    //$order_result_temp = bc_callAPI("GET", 'v2/orders?include=consignments.line_items&cart_id=' . $cart_id, false);
+    //usage inside your webhook/handler after you fetched bcOrder (v2)
+    const lineItems = getLineItemsFromOrder(bcOrder);
 
-    // save order
+    let isOrderKr = false;
+    for (const item of lineItems) {
+      const designId = getOptionValue(item, "Design Id");
+      if (designId > 0) {
+        isOrderKr = true;
+      }
+    }
+
+    if (isOrderKr === false) {
+      return res.status(200).send("ok");
+    }
+
+    //save order
     const result = await mysqlQuery(
-      "INSERT INTO bcOrders (storeHash, orderId, customerId, order_json) VALUES (?,?,?,?)",
-      [storeHash, bcOrder.id, bcOrder.customer_id, JSON.stringify(bcOrder)]
+      "INSERT INTO bcOrders (storeHash, orderId, order_total_inc_tax, order_total_ex_tax, order_items_total, customerId, order_json) VALUES (?,?,?,?,?,?,?)",
+      [
+        storeHash,
+        bcOrder.id,
+        bcOrder.total_inc_tax,
+        bcOrder.total_ex_tax,
+        bcOrder.items_total,
+        bcOrder.customer_id,
+        JSON.stringify(bcOrder),
+      ]
     );
 
     const newOrderId = result.insertId;
-
-    // usage inside your webhook/handler after you fetched bcOrder (v2)
-    const lineItems = getLineItemsFromOrder(bcOrder);
 
     for (const item of lineItems) {
       const designId = getOptionValue(item, "Design Id");
@@ -116,6 +134,6 @@ export default async function handler(
 
   } catch (err) {
     console.error("Webhook error", err);
-    return res.status(500).send("error");
+    return res.status(200).send("ok");
   }
 }
