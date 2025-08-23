@@ -59,8 +59,6 @@ export async function setStore(session: SessionProps) {
   const storeData: StoreData = { accessToken, scope, storeHash };
   await query("REPLACE INTO stores SET ?", storeData);
 
-  console.warn('Init setLoginMaster V1');
-  
   // Only set on app install or update
   const { id, username, email } = owner;
   
@@ -75,6 +73,26 @@ export async function setStore(session: SessionProps) {
 
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
+  }
+
+  // ---------------------------
+  // ✅ Register Order Webhook
+  // ---------------------------
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  try {
+    const { data: hooks } = await bigcommerce.get("/hooks");
+    const exists = hooks.some((h: any) => h.scope === "store/order/created");
+
+    if (!exists) {
+      await bigcommerce.post("/hooks", {
+        scope: "store/order/created",
+        destination: `${process.env.customizer_app_domain}api/server/webhooks/order-created`,
+        is_active: true,
+      });
+      console.warn(`[Webhook] ✅ store/order/created registered for ${storeHash}`);
+    }
+  } catch (err: any) {
+    console.error("[Webhook] ❌ Failed to register order webhook:", err.response?.data || err.message);
   }
   
 }
