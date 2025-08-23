@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { bigcommerceClient } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
+import languageEN from "lang/en";
 
 // helpers
 function getLineItemsFromOrder(bcOrder: any) {
@@ -77,7 +78,7 @@ export default async function handler(
 
     let isOrderKr = false;
     for (const item of lineItems) {
-      const designId = getOptionValue(item, "Design Id");
+      const designId = getOptionValue(item, languageEN?.modifierDisplayNames?.designId);
       if (designId > 0) {
         isOrderKr = true;
       }
@@ -103,10 +104,12 @@ export default async function handler(
 
     const newOrderId = result.insertId;
 
+    
+
     for (const item of lineItems) {
-      const designId = getOptionValue(item, "Design Id");
-      const previewUrl = getOptionValue(item, "View Design");
-      const designAreaRaw = getOptionValue(item, "Design Area");
+      const designId = getOptionValue(item, languageEN?.modifierDisplayNames?.designId);
+      const previewUrl = getOptionValue(item, languageEN?.modifierDisplayNames?.viewDesign);
+      const designAreaRaw = getOptionValue(item, languageEN?.modifierDisplayNames?.designArea);
       const designArea = parseMaybeJSON(designAreaRaw);
 
       await mysqlQuery(
