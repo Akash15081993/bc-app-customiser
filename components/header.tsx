@@ -7,12 +7,14 @@ import InnerHeader from './innerHeader';
 export const TabIds = {
     HOME: 'home',
     PRODUCTS: 'products',
+    ORDERS: 'orders',
     SETTINGS: 'settings',
 };
 
 export const TabRoutes = {
     [TabIds.HOME]: '/',
     [TabIds.PRODUCTS]: '/products',
+    [TabIds.ORDERS]: '/orders',
     [TabIds.SETTINGS]: '/settings',
 };
 
@@ -57,6 +59,7 @@ const Header = () => {
     const items = [
         { ariaControls: 'home', id: TabIds.HOME, title: 'Dashborad' },
         { ariaControls: 'products', id: TabIds.PRODUCTS, title: 'Products' },
+        { ariaControls: 'orders', id: TabIds.ORDERS, title: 'Orders' },
         { ariaControls: 'settings', id: TabIds.SETTINGS, title: 'Settings' },
     ];
 

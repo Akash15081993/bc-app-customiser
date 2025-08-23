@@ -43,6 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (err: any) {
     console.error("set-script error", err?.response?.data || err);
-    return res.status(500).json({ error: "Failed to set script" });
+    
+return res.status(500).json({ error: "Failed to set script" });
   }
 }

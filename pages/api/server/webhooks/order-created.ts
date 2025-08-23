@@ -17,14 +17,16 @@ function getLineItemsFromOrder(bcOrder: any) {
   }
   // Fallback if you ever fetch with ?include=products instead
   if (Array.isArray(bcOrder?.products)) return bcOrder.products;
-  return [];
+  
+return [];
 }
 
 function getOptionValue(item: any, displayName: string) {
   const opt = (item?.product_options ?? []).find(
     (o: any) => o.display_name === displayName
   );
-  return opt?.display_value ?? null;
+  
+return opt?.display_value ?? null;
 }
 
 function parseMaybeJSON(str: any) {
@@ -137,6 +139,7 @@ export default async function handler(
 
   } catch (err) {
     console.error("Webhook error", err);
-    return res.status(200).send("ok");
+    
+return res.status(200).send("ok");
   }
 }

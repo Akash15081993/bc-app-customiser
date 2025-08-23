@@ -8,7 +8,8 @@ export function runCors(req: NextApiRequest, res: NextApiResponse) {
   // Handle preflight
   if (req.method === "OPTIONS") {
     res.status(200).end();
-    return true; // stop further execution
+    
+return true; // stop further execution
   }
 
   return false;

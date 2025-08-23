@@ -9,7 +9,6 @@ function base64UrlDecode(str: string) {
 }
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
-
   //Apply CORS
   if (runCors(req, res)) return;
 

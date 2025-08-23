@@ -1,25 +1,17 @@
-import {
-  Button,
-  Flex,
-  FlexItem,
-  Message,
-  Panel,
-  Table,
-} from "@bigcommerce/big-design";
-import { AddIcon } from "@bigcommerce/big-design-icons";
+import { Flex, FlexItem, Message, Panel, Table } from "@bigcommerce/big-design";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Loading from "@components/loading";
-import ProductActionDropdown from "@components/products/productAction";
+import OrderActionDropdown from "@components/orders/orderAction";
 import { useSession } from "context/session";
 
-const Products = () => {
+const Orders = () => {
   const router = useRouter();
   const encodedContext = useSession()?.context;
   const [pageLoading, setpageLoading] = useState(true);
   const [pageSuccess, setPageSuccess] = useState("");
   const [pageError, setPageError] = useState("");
-  const [pageRender, setPageRender] = useState(false);
+  //const [pageRender, setPageRender] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPageOptions] = useState([15, 35, 50, 80]);
@@ -28,46 +20,47 @@ const Products = () => {
   const [paginationData, setPaginationData] = useState({
     total: 0,
     current_page: 1,
-    per_page: 5,
+    per_page: 15,
   });
 
   const onPageChange = (page) => {
     setCurrentPage(page);
-    getProduct(page, itemsPerPage);
+    getOrders(page, itemsPerPage);
   };
 
   const onItemsPerPageChange = (perPage) => {
     setItemsPerPage(perPage);
     setCurrentPage(1);
-    getProduct(1, perPage);
+    getOrders(1, perPage);
   };
 
-  const getProduct = async (page = 1, perPage = itemsPerPage) => {
+  const getOrders = async (page = 1, perPage = itemsPerPage) => {
     setpageLoading(true);
     setPageError("");
 
     if (encodedContext == "") {
       router.push("unthorization-error");
-      
-return;
+      return;
     }
 
     try {
-      const getProducts = await fetch(`/api/server/products/all?context=${encodedContext}`,{
+      const getOrders = await fetch(
+        `/api/server/orders/all?context=${encodedContext}`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ page, limit: perPage }),
         }
       );
-      const productRes = await getProducts.json();
+      const orderRes = await getOrders.json();
 
-      if (productRes?.message) {
-        setPageError(productRes?.message);
+      if (orderRes?.message) {
+        setPageError(orderRes?.message);
       }
 
-      const products = productRes?.products;
-      const pagination = productRes?.pagination;
-      setCurrentItems(products);
+      const orders = orderRes?.orders;
+      const pagination = orderRes?.pagination;
+      setCurrentItems(orders);
       setPaginationData({
         total: pagination?.totalItems,
         current_page: pagination?.totalItems,
@@ -81,40 +74,12 @@ return;
     }
   };
 
-  // useEffect(() => {
-  // if (encodedContext) { getProduct(); }else{ setpageLoading(false); }
-  // }, [encodedContext, pageRender]);
-
   useEffect(() => {
-    getProduct();
-  }, [encodedContext, pageRender]);
-
-  const renderImage = (images) => {
-    const thumbnail = images;
-    const fallback = "/assets/coming-soon-img.gif";
-
-    return (
-      <img src={thumbnail || fallback} width={40} height={40} alt="Product" />
-    );
-  };
+    getOrders();
+  }, [encodedContext]);
 
   return (
-    <Panel id="products">
-      <Flex justifyContent="flex-end" style={{ marginBottom: "20px" }}>
-        <FlexItem>
-          <Button
-            actionType="normal"
-            isLoading={false}
-            variant="primary"
-            onClick={() => {
-              router.push(`/product-form`);
-            }}
-          >
-            <AddIcon /> Add product for design
-          </Button>
-        </FlexItem>
-      </Flex>
-
+    <Panel id="orders">
       {pageSuccess && (
         <Message
           header={pageSuccess.split("|@|")[0]}
@@ -137,35 +102,40 @@ return;
       )}
 
       {!pageLoading && currentItems?.length > 0 && (
+        <p>You will only see orders for customized products in this list.</p>
+      )}
+
+      {!pageLoading && currentItems?.length > 0 && (
         <Table
           columns={[
             {
-              header: "Image",
-              hash: "images",
-              render: ({ productImage }) => renderImage(productImage),
-              width: "80",
+              header: "Order Id",
+              hash: "orderId",
+              render: ({ orderId }) => orderId,
             },
             {
-              header: "Name",
-              hash: "name",
-              render: ({ productName }) => productName,
+              header: "Total Items",
+              hash: "totalItems",
+              render: ({ order_items_total }) => order_items_total,
             },
             {
-              header: "SKU",
-              hash: "sku",
-              render: ({ productSku }) => productSku,
+              header: "Inc. Total",
+              hash: "totalItems",
+              render: ({ order_total_inc_tax }) => order_total_inc_tax,
+            },
+            {
+              header: "Ex. Total",
+              hash: "totalItems",
+              render: ({ order_total_ex_tax }) => order_total_ex_tax,
             },
             {
               header: "Action",
               hash: "action",
-              render: ({ productId, id }) => (
-                <ProductActionDropdown
+              render: ({ id, orderId }) => (
+                <OrderActionDropdown
                   {...{
-                    pageRender: setPageRender,
-                    pageLoading: setpageLoading,
-                    pageSuccess: setPageSuccess,
-                    productId,
                     id,
+                    orderId,
                     jwtToken: encodedContext,
                   }}
                 />
@@ -175,7 +145,7 @@ return;
             },
           ]}
           items={currentItems}
-          itemName="Products"
+          itemName="Orders"
           stickyHeader
           pagination={{
             currentPage,
@@ -191,10 +161,7 @@ return;
       {!pageLoading && currentItems?.length == 0 && (
         <Flex justifyContent="center" style={{ padding: "40px 0" }}>
           <FlexItem>
-            <center>
-              You have no any product for design. Kindly include a new product
-              in the design.
-            </center>
+            <center>You have no any order.</center>
           </FlexItem>
         </Flex>
       )}
@@ -204,4 +171,4 @@ return;
   );
 };
 
-export default Products;
+export default Orders;

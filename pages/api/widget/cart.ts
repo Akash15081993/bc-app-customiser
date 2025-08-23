@@ -11,12 +11,14 @@ function base64UrlDecode(str: string) {
 }
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
-  
   //Apply CORS
   if (runCors(req, res)) return;
 
   try {
-    if (req.method === "GET") return res .status(405).json({ status: false, message: "Method not allowed" });
+    if (req.method === "GET")
+      return res
+        .status(405)
+        .json({ status: false, message: "Method not allowed" });
 
     try {
       const bodyData = req.body as any;
@@ -58,16 +60,17 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
         //Return if design id not found
         if (kr_design_id <= 0) {
-          return res
-            .status(200)
-            .json({
-              status: false,
-              message:
-                "Your design is not ready please reload browser and try again.",
-            });
+          return res.status(200).json({
+            status: false,
+            message:
+              "Your design is not ready please reload browser and try again.",
+          });
         }
 
-        const storeData = await mysqlQuery("SELECT  `accessToken` FROM `stores` WHERE `storeHash` = ?", [kr_store_hash]);
+        const storeData = await mysqlQuery(
+          "SELECT  `accessToken` FROM `stores` WHERE `storeHash` = ?",
+          [kr_store_hash]
+        );
         const authData = storeData[0]?.accessToken;
 
         //Return if user is not valid
@@ -80,10 +83,14 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         //Connect with bc
         const bigcommerce = bigcommerceClient(authData, kr_store_hash);
 
-        //Get product 
-        const productResult = await bigcommerce.get(`/catalog/products/?keyword=${kr_product_sku}&include_fields=name,inventory_level,inventory_tracking`);
-        if(productResult?.data?.length == 0){
-          return res.status(200).json({ status: false, message: "Product not found.", data: null });  
+        //Get product
+        const productResult = await bigcommerce.get(
+          `/catalog/products/?keyword=${kr_product_sku}&include_fields=name,inventory_level,inventory_tracking`
+        );
+        if (productResult?.data?.length == 0) {
+          return res
+            .status(200)
+            .json({ status: false, message: "Product not found.", data: null });
         }
 
         const productData = productResult?.data[0];
@@ -92,8 +99,20 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         const productinventory_tracking = productData?.inventory_tracking;
 
         //Check Inventory
-        if(productinventory_tracking != "none" && quantity > productInventory){
-          return res.status(200).json({ status: false, message: "We don't have enough "+productTitle+" stock on hand for the quantity you selected. Please try again.", data: productData });
+        if (
+          productinventory_tracking != "none" &&
+          quantity > productInventory
+        ) {
+          return res
+            .status(200)
+            .json({
+              status: false,
+              message:
+                "We don't have enough " +
+                productTitle +
+                " stock on hand for the quantity you selected. Please try again.",
+              data: productData,
+            });
         }
 
         //Get product modifiers
@@ -142,19 +161,30 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         const modifierIds = await fetchFilteredModifierIds(kr_product_id, 50);
 
         //Get Save product data
-        const productSaved = await mysqlQuery("SELECT  `product_data` FROM `productSaved` WHERE `id` = ?", [kr_design_id]);
+        const productSaved = await mysqlQuery(
+          "SELECT  `product_data` FROM `productSaved` WHERE `id` = ?",
+          [kr_design_id]
+        );
 
-        if(productSaved?.length == 0){
-          return res.status(200).json({ status: false, message: "Product save not found." });
+        if (productSaved?.length == 0) {
+          return res
+            .status(200)
+            .json({ status: false, message: "Product save not found." });
         }
 
         const productSaveResult = JSON.parse(productSaved[0]?.product_data);
 
         //Final product price
-        const finallyCartPrice = parseFloat(kr_product_price) + (parseFloat(productSaveResult?.customizations?.krCustomizedPrice) || 0);
+        const finallyCartPrice =
+          parseFloat(kr_product_price) +
+          (parseFloat(productSaveResult?.customizations?.krCustomizedPrice) ||
+            0);
 
         //krDesign Data
-        const desginImage = productSaveResult?.screenshots?.length > 0 ? productSaveResult?.screenshots[0]?.url : 0;
+        const desginImage =
+          productSaveResult?.screenshots?.length > 0
+            ? productSaveResult?.screenshots[0]?.url
+            : 0;
         const designArea = JSON.stringify(productSaveResult);
 
         // Build option selections
@@ -196,26 +226,49 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           };
 
           if (bcCartId === null) {
-
             try {
-              const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`, cartPayload);
-              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+              const cartResult = await bigcommerce.post(
+                `/carts?include=redirect_urls`,
+                cartPayload
+              );
+
+              return res
+                .status(200)
+                .json({
+                  status: true,
+                  message: "Success.",
+                  data: cartResult?.data,
+                });
             } catch (error) {
-              const errorMessage = JSON.parse(error?.responseBody).title || error;
-              return res.status(200).json({ status: false, message: errorMessage  });
+              const errorMessage =
+                JSON.parse(error?.responseBody).title || error;
+
+              return res
+                .status(200)
+                .json({ status: false, message: errorMessage });
             }
-
-
           } else {
-
             try {
-              const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`,cartPayload);
-              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
-            } catch (error) {
-              const errorMessage = JSON.parse(error?.responseBody).title || error;
-              return res.status(200).json({ status: false, message: errorMessage  });
-            }
+              const cartResult = await bigcommerce.post(
+                `/carts/${bcCartId}/items?include=redirect_urls`,
+                cartPayload
+              );
 
+              return res
+                .status(200)
+                .json({
+                  status: true,
+                  message: "Success.",
+                  data: cartResult?.data,
+                });
+            } catch (error) {
+              const errorMessage =
+                JSON.parse(error?.responseBody).title || error;
+
+              return res
+                .status(200)
+                .json({ status: false, message: errorMessage });
+            }
           }
         }
 
@@ -252,28 +305,51 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           };
 
           if (bcCartId === null) {
-
             try {
-              const cartResult = await bigcommerce.post(`/carts?include=redirect_urls`,cartPayload);
-              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+              const cartResult = await bigcommerce.post(
+                `/carts?include=redirect_urls`,
+                cartPayload
+              );
+
+              return res
+                .status(200)
+                .json({
+                  status: true,
+                  message: "Success.",
+                  data: cartResult?.data,
+                });
             } catch (error) {
-              const errorMessage = JSON.parse(error?.responseBody).title || error;
-              return res.status(200).json({ status: false, message: errorMessage  });
+              const errorMessage =
+                JSON.parse(error?.responseBody).title || error;
+
+              return res
+                .status(200)
+                .json({ status: false, message: errorMessage });
             }
-            
           } else {
-
             try {
-              const cartResult = await bigcommerce.post(`/carts/${bcCartId}/items?include=redirect_urls`,cartPayload);
-              return res.status(200).json({ status: true, message: "Success.", data: cartResult?.data });
+              const cartResult = await bigcommerce.post(
+                `/carts/${bcCartId}/items?include=redirect_urls`,
+                cartPayload
+              );
+
+              return res
+                .status(200)
+                .json({
+                  status: true,
+                  message: "Success.",
+                  data: cartResult?.data,
+                });
             } catch (error) {
-              const errorMessage = JSON.parse(error?.responseBody).title || error;
-              return res.status(200).json({ status: false, message: errorMessage  });
+              const errorMessage =
+                JSON.parse(error?.responseBody).title || error;
+
+              return res
+                .status(200)
+                .json({ status: false, message: errorMessage });
             }
-            
           }
         }
-
       } else {
         return res.status(401).json({
           status: false,

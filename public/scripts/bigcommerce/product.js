@@ -216,9 +216,11 @@ function validateForm(form) {
                 firstInvalid.focus();
             }
         }
-        return false;
+        
+return false;
     }
-    return true;
+    
+return true;
 }
 
 //customize button Validation & handel
@@ -335,7 +337,8 @@ document.addEventListener("click", async function (e) {
 
         if (kr_store_form_data == null || (typeof kr_store_form_data === 'object' && Object.keys(kr_store_form_data).length === 0)) {
             appModelVisibility('hide');
-            return false;
+            
+return false;
         }
         appModelVisibility('show');
 
@@ -405,7 +408,8 @@ function initCartObserver() {
         }, 150);
     });
     observer.observe(cartContainer, { childList: true, subtree: true });
-    return observer;
+    
+return observer;
 }
 
 if (kr_page_type == "cart") {

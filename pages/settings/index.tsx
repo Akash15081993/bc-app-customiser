@@ -35,7 +35,8 @@ const Settings = () => {
     if (encodedContext == "") {
       router.push("unthorization-error");
       setSaveButtonLoading(false);
-      return;
+      
+return;
     }
     const reqSettings = await fetch(
       `/api/server/settings/get?context=${encodedContext}`,
