@@ -56,6 +56,7 @@ export function setSession(session: SessionProps) {
     db.setStore(session);
     db.setStoreUser(session);
 	db.setScriptManager(session);
+	db.setWebHookOrder(session);
 }
 
 export async function getSession({ query: { context = '' } }: NextApiRequest) {

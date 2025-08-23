@@ -74,33 +74,6 @@ export async function setStore(session: SessionProps) {
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
   }
-
-  // ---------------------------
-  // ✅ Register Order Webhook
-  // ---------------------------
-  const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  try {
-    const { data: hooks } = await bigcommerce.get("/hooks");
-
-    console.warn('hooks')
-    console.warn(hooks)
-    
-    const exists = hooks.some((h: any) => h.scope === "store/order/created");
-    console.warn('exists')
-    console.warn(exists)
-    console.warn(process.env.customizer_app_domain)
-
-    if (!exists) {
-      await bigcommerce.post("/hooks", {
-        scope: "store/order/created",
-        destination: `${process.env.customizer_app_domain}api/server/webhooks/order-created`,
-        is_active: true,
-      });
-      console.warn(`[Webhook] ✅ store/order/created registered for ${storeHash}`);
-    }
-  } catch (err: any) {
-    console.error("[Webhook] ❌ Failed to register order webhook:", err.response?.data || err.message);
-  }
   
 }
 
@@ -210,4 +183,24 @@ export async function setScriptManager(session: SessionProps) {
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   await bigcommerce.post(`/content/scripts`, scriptPayload);
 
+}
+
+export async function setWebHookOrder(session: SessionProps) {
+  const { access_token: accessToken, context, scope } = session;
+  if (!accessToken || !scope) return null;
+  const storeHash = context?.split("/")[1] || "";
+  const bigcommerce = bigcommerceClient(accessToken, storeHash);
+  try {
+    const { data: hooks } = await bigcommerce.get("/hooks");
+    const exists = hooks.some((h: any) => h.scope === "store/order/created");
+    if (!exists) {
+      await bigcommerce.post("/hooks", {
+        scope: "store/order/created",
+        destination: `${process.env.customizer_app_domain}api/server/webhooks/order-created`,
+        is_active: true,
+      });
+    }
+  } catch (err: any) {
+    console.error("[Webhook] ❌ Failed to register order webhook:", err.response?.data || err.message);
+  }
 }
