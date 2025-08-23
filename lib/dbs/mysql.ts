@@ -81,7 +81,14 @@ export async function setStore(session: SessionProps) {
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   try {
     const { data: hooks } = await bigcommerce.get("/hooks");
+
+    console.warn('hooks')
+    console.warn(hooks)
+    
     const exists = hooks.some((h: any) => h.scope === "store/order/created");
+    console.warn('exists')
+    console.warn(exists)
+    console.warn(process.env.customizer_app_domain)
 
     if (!exists) {
       await bigcommerce.post("/hooks", {
