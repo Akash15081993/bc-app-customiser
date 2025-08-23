@@ -43,28 +43,28 @@ export default async function handler(
 ) {
   try {
     const payload = req.body;
-    console.warn("payload");
-    console.warn(payload);
 
     const cartId = payload?.data?.id;
     const producer = payload?.producer;
     const storeHash = producer?.split("/")[1] || "";
-    console.warn('storeHash')
-    console.warn(storeHash)
 
     if (!storeHash) {
       return res.status(400).send("Missing storeHash");
     }
 
     // lookup access token for store
-    const store = await mysqlQuery("SELECT accessToken FROM stores WHERE storeHash = ?",[storeHash]);
-
-    console.warn('store')
-    console.warn(store)
+    const store = await mysqlQuery(
+      "SELECT accessToken FROM stores WHERE storeHash = ?",
+      [storeHash]
+    );
 
     if (!store?.[0]) return res.status(401).send("Store not found");
 
-    const bigcommerce = bigcommerceClient(store[0].accessToken, storeHash, "v2");
+    const bigcommerce = bigcommerceClient(
+      store[0].accessToken,
+      storeHash,
+      "v2"
+    );
 
     // fetch order details
     const allOrders = await bigcommerce.get(
@@ -93,11 +93,12 @@ export default async function handler(
 
       await mysqlQuery(
         `INSERT INTO bcOrderProducts 
-        (storeHash, orderId, productId, productName, productSku, designId, designArea, previewUrl, productJson) 
+        (storeHash, bcOrdersId, orderId, productId, productName, productSku, designId, designArea, previewUrl, productJson) 
         VALUES (?,?,?,?,?,?,?,?,?)`,
         [
           storeHash,
           newOrderId,
+          bcOrder.id,
           item.product_id,
           item.name,
           item.sku,
@@ -112,7 +113,7 @@ export default async function handler(
     }
 
     return res.status(200).send("ok");
-    
+
   } catch (err) {
     console.error("Webhook error", err);
     return res.status(500).send("error");
