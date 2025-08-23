@@ -10,7 +10,6 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
 
       const { storeHash, user } = await getSession(req);
-
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 
       const { page, limit } = req.body;
