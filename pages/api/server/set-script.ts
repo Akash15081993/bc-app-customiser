@@ -25,10 +25,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Ensure Order Webhook
     // -------------------------
     const { data: hooks } = await bigcommerce.get("/hooks");
-    const existingHook = hooks.find((h: any) => h.scope === "store/order/created");
+    const existingHook = hooks.find((h: any) => h.scope === "store/cart/converted");
     if (!existingHook) {
       await bigcommerce.post("/hooks", {
-        scope: "store/order/created",
+        scope: "store/cart/converted",
         destination: `${process.env.customizer_app_domain}api/server/webhooks/order-created`,
         is_active: true,
       });
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     return res.status(200).json({ success: true, reinstalled: !exists ? true : false });
-    
+
   } catch (err: any) {
     console.error("set-script error", err?.response?.data || err);
     return res.status(500).json({ error: "Failed to set script" });

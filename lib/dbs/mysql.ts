@@ -192,10 +192,10 @@ export async function setWebHookOrder(session: SessionProps) {
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   try {
     const { data: hooks } = await bigcommerce.get("/hooks");
-    const exists = hooks.some((h: any) => h.scope === "store/order/created");
+    const exists = hooks.some((h: any) => h.scope === "store/cart/converted");
     if (!exists) {
       await bigcommerce.post("/hooks", {
-        scope: "store/order/created",
+        scope: "store/cart/converted",
         destination: `${process.env.customizer_app_domain}api/server/webhooks/order-created`,
         is_active: true,
       });

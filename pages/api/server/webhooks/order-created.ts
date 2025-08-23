@@ -2,57 +2,109 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { bigcommerceClient } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
 
+// helpers
+function getLineItemsFromOrder(bcOrder: any) {
+  // Preferred: consignments.shipping[].line_items[]
+  if (Array.isArray(bcOrder?.consignments)) {
+    const out: any[] = [];
+    for (const c of bcOrder.consignments) {
+      for (const s of c?.shipping ?? []) {
+        for (const li of s?.line_items ?? []) out.push(li);
+      }
+    }
+    if (out.length) return out;
+  }
+  // Fallback if you ever fetch with ?include=products instead
+  if (Array.isArray(bcOrder?.products)) return bcOrder.products;
+  return [];
+}
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+function getOptionValue(item: any, displayName: string) {
+  const opt = (item?.product_options ?? []).find(
+    (o: any) => o.display_name === displayName
+  );
+  return opt?.display_value ?? null;
+}
+
+function parseMaybeJSON(str: any) {
+  if (typeof str !== "string") return str;
+  const t = str.trim();
+  if (!(t.startsWith("{") || t.startsWith("["))) return str;
   try {
-    const payload = req.body; // { data: { id: orderId }, scope: "store/order/created", store_id: "xxxx" }
-    const orderId = payload?.data?.id;
-    const storeHash = payload?.store_id;
+    return JSON.parse(str);
+  } catch {
+    return str;
+  }
+}
 
-    if (!orderId || !storeHash) {
-      return res.status(400).send("Missing orderId or storeHash");
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  try {
+    const payload = req.body;
+    console.warn("payload");
+    console.warn(payload);
+
+    const cartId = payload?.data?.id;
+    const producer = payload?.producer;
+    const storeHash = producer?.split("/")[1] || "";
+    console.warn('storeHash')
+    console.warn(storeHash)
+
+    if (!storeHash) {
+      return res.status(400).send("Missing storeHash");
     }
 
     // lookup access token for store
-    const store = await mysqlQuery("SELECT access_token FROM stores WHERE store_hash=?", [storeHash]);
+    const store = await mysqlQuery("SELECT accessToken FROM stores WHERE storeHash = ?",[storeHash]);
+
+    console.warn('store')
+    console.warn(store)
+
     if (!store?.[0]) return res.status(401).send("Store not found");
 
-    const bigcommerce = bigcommerceClient(store[0].access_token, storeHash);
+    const bigcommerce = bigcommerceClient(store[0].accessToken, storeHash, "v2");
 
     // fetch order details
-    const { data: order } = await bigcommerce.get(`/v2/orders/${orderId}?include=line_items`);
+    const allOrders = await bigcommerce.get(
+      `/orders?include=consignments.line_items&cart_id=${cartId}`
+    );
+    const bcOrder = allOrders[allOrders.length - 1];
+
+    //$order_result_temp = bc_callAPI("GET", 'v2/orders?include=consignments.line_items&cart_id=' . $cart_id, false);
 
     // save order
     const result = await mysqlQuery(
-      "INSERT INTO bc_orders (store_hash, order_id, customer_id, order_json) VALUES (?,?,?,?)",
-      [storeHash, order.id, order.customer_id, JSON.stringify(order)]
+      "INSERT INTO bcOrders (storeHash, orderId, customerId, order_json) VALUES (?,?,?,?)",
+      [storeHash, bcOrder.id, bcOrder.customer_id, JSON.stringify(bcOrder)]
     );
 
     const newOrderId = result.insertId;
 
-    // save line items
-    for (const item of order.products || []) {
-      let designId = null;
-      let designArea = null;
-      let previewUrl = null;
+    // usage inside your webhook/handler after you fetched bcOrder (v2)
+    const lineItems = getLineItemsFromOrder(bcOrder);
 
-      if (item.product_options?.length) {
-        for (const opt of item.product_options) {
-          if (opt.display_name === "Design Id") designId = opt.display_value;
-          if (opt.display_name === "Design Area") designArea = opt.display_value;
-          if (opt.display_name === "Preview Url") previewUrl = opt.display_value;
-        }
-      }
+    for (const item of lineItems) {
+      const designId = getOptionValue(item, "Design Id");
+      const previewUrl = getOptionValue(item, "View Design");
+      const designAreaRaw = getOptionValue(item, "Design Area");
+      const designArea = parseMaybeJSON(designAreaRaw);
 
       await mysqlQuery(
-        "INSERT INTO bc_order_items (order_id, product_id, product_name, sku, design_id, design_area, preview_url, line_item_json) VALUES (?,?,?,?,?,?,?,?)",
+        `INSERT INTO bcOrderProducts 
+        (storeHash, orderId, productId, productName, productSku, designId, designArea, previewUrl, productJson) 
+        VALUES (?,?,?,?,?,?,?,?,?)`,
         [
+          storeHash,
           newOrderId,
           item.product_id,
           item.name,
           item.sku,
           designId,
-          designArea,
+          typeof designArea === "string"
+            ? designArea
+            : JSON.stringify(designArea),
           previewUrl,
           JSON.stringify(item),
         ]
