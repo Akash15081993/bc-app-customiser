@@ -94,7 +94,7 @@ export default async function handler(
       await mysqlQuery(
         `INSERT INTO bcOrderProducts 
         (storeHash, bcOrdersId, orderId, productId, productName, productSku, designId, designArea, previewUrl, productJson) 
-        VALUES (?,?,?,?,?,?,?,?,?)`,
+        VALUES (?,?,?,?,?,?,?,?,?,?)`,
         [
           storeHash,
           newOrderId,
