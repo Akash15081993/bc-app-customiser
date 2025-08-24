@@ -2,6 +2,7 @@ import {
   Button,
   Flex,
   FlexItem,
+  Input,
   Message,
   Panel,
   Table,
@@ -25,6 +26,10 @@ const Products = () => {
   const [itemsPerPageOptions] = useState([15, 35, 50, 80]);
   const [itemsPerPage, setItemsPerPage] = useState(15);
   const [currentItems, setCurrentItems] = useState<[]>([]);
+
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchProductId, setSearchProductId] = useState("");
+
   const [paginationData, setPaginationData] = useState({
     total: 0,
     current_page: 1,
@@ -48,12 +53,14 @@ const Products = () => {
 
     if (encodedContext == "") {
       router.push("unthorization-error");
-      
-return;
+
+      return;
     }
 
     try {
-      const getProducts = await fetch(`/api/server/products/all?context=${encodedContext}`,{
+      const getProducts = await fetch(
+        `/api/server/products/all?context=${encodedContext}`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ page, limit: perPage }),
@@ -98,9 +105,65 @@ return;
     );
   };
 
+  //handle search
+  const handleSearch = async () => {
+    if (!searchProductId.trim()) {
+      return;
+    }
+    const getProducts = await fetch(
+      `/api/server/products/search-db?context=${encodedContext}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ searchTerm: searchProductId?.trim() }),
+      }
+    );
+    const productRes = await getProducts.json();
+    const products = productRes?.products;
+    setCurrentItems(products || []);
+    setIsSearchActive(true);
+
+    setPaginationData({
+      total: products?.length,
+      current_page: products?.length,
+      per_page: 15,
+    });
+  };
+
   return (
     <Panel id="products">
-      <Flex justifyContent="flex-end" style={{ marginBottom: "20px" }}>
+      <Flex justifyContent="space-between" style={{ marginBottom: "20px" }}>
+        {/* Search box */}
+        <Flex marginBottom="medium" alignItems="center">
+          <Input
+            maxLength={80}
+            placeholder="Search Name & SKU"
+            value={searchProductId}
+            onChange={(e) => setSearchProductId(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+          />
+          <Button marginLeft="small" onClick={handleSearch}>
+            Search
+          </Button>
+          {isSearchActive && (
+            <Button
+              variant="secondary"
+              marginLeft="small"
+              onClick={() => {
+                getProduct();
+                setSearchProductId("");
+                setIsSearchActive(false);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </Flex>
+
         <FlexItem>
           <Button
             actionType="normal"

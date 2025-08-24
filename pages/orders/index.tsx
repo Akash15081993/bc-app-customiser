@@ -25,13 +25,16 @@ const Orders = () => {
   const [itemsPerPage, setItemsPerPage] = useState(15);
   const [currentItems, setCurrentItems] = useState<any[]>([]);
 
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchOrderId, setSearchOrderId] = useState("");
+
   const [paginationData, setPaginationData] = useState({
     total: 0,
     current_page: 1,
     per_page: 15,
   });
 
-  const [searchOrderId, setSearchOrderId] = useState("");
+  
 
   const onPageChange = (page) => {
     setCurrentPage(page);
@@ -84,11 +87,12 @@ const Orders = () => {
     }
   };
 
-  // handle search
+  //handle search
   const handleSearch = async () => {
     if (!searchOrderId.trim()) {
       return;
     }
+    
     const getOrders = await fetch(
       `/api/server/orders/search?context=${encodedContext}`,
       {
@@ -100,6 +104,14 @@ const Orders = () => {
     const orderRes = await getOrders.json();
     const orders = orderRes?.orders;
     setCurrentItems(orders || []);
+    setIsSearchActive(true)
+
+    setPaginationData({
+        total: orders?.length,
+        current_page: orders?.length,
+        per_page: 15,
+    });
+
   };
 
   useEffect(() => {
@@ -138,6 +150,8 @@ const Orders = () => {
       {/* Search box */}
       <Flex marginBottom="medium" alignItems="center">
         <Input
+          maxLength={15} 
+          type="number"
           placeholder="Search by Order ID"
           value={searchOrderId}
           onChange={(e) => setSearchOrderId(e.target.value)}
@@ -150,17 +164,19 @@ const Orders = () => {
         <Button marginLeft="small" onClick={handleSearch}>
           Search
         </Button>
-
-        <Button
-          variant="secondary"
-          marginLeft="small"
-          onClick={() => {
-            getOrders();
-            setSearchOrderId("");
-          }}
-        >
-          Clear
-        </Button>
+        { isSearchActive && (
+          <Button
+            variant="secondary"
+            marginLeft="small"
+            onClick={() => {
+              getOrders();
+              setSearchOrderId("");
+              setIsSearchActive(false);
+            }}
+          >
+            Clear
+          </Button>
+        )}
       </Flex>
 
       {!pageLoading && currentItems?.length > 0 && (
