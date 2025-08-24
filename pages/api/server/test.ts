@@ -7,7 +7,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // const bigcommerce = bigcommerceClient("1212", "1212", 'v2');
         // const myData = await bigcommerce.get(`/orders/100`);
         // return res.status(200).json({ status: true, data: myData });
-        return res.status(200).json({ status: true, myOrder: "bcOrder" });
+
+        // const bigcommerce = bigcommerceClient("121212", "vl5e5n6g4x", "v2");
+        // const storeInformation = await bigcommerce.get(`/store`);
+
+        return res.status(200).json({ status: true, myOrder: 'storeInformation' });
 
     } catch (error) {
         

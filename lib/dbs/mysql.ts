@@ -65,7 +65,7 @@ export async function setStore(session: SessionProps) {
   const bigcommerce = bigcommerceClient(accessToken, storeHash, "v2");
   
   //Get Store Information
-  const storeInformation = await bigcommerce.get(`store`);
+  const storeInformation = await bigcommerce.get(`/store`);
 
   const loginMasterBody = {
     firstName : storeInformation?.first_name,
