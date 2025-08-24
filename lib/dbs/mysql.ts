@@ -62,14 +62,25 @@ export async function setStore(session: SessionProps) {
   // Only set on app install or update
   const { id, username, email } = owner;
   
-  const loginMasterBody = { email, userId:id, userName:username, storeHash, accessToken };
+  const bigcommerce = bigcommerceClient(accessToken, storeHash, "v2");
+  
+  //Get Store Information
+  const storeInformation = await bigcommerce.get(`store`);
 
-  console.warn('Init setLoginMaster V2');
+  const loginMasterBody = {
+    firstName : storeInformation?.first_name,
+    lastName : storeInformation?.last_name,
+    phone : storeInformation?.phone,
+    storeUrl : storeInformation?.secure_url,
+    storeName : storeInformation?.name,
+    email,
+    userId:id,
+    userName:username,
+    storeHash,
+  };
 
   //Customs Login Added
   const [existing] = await query("SELECT id FROM loginMaster WHERE email = ? AND storeHash = ?", [email, storeHash]) as any[];
-
-  console.warn('Init setLoginMaster V3');
 
   if (!existing) {
     await query("INSERT INTO loginMaster SET ?", loginMasterBody);
@@ -165,20 +176,7 @@ export async function setScriptManager(session: SessionProps) {
   if (!accessToken || !scope) return null;
   const storeHash = context?.split("/")[1] || "";
   
-  // const scriptPayload = {
-  //   "name": "KR Customizer",
-  //   "description": "KR Customizer customizer app Script",
-  //   "src" : `${process?.env?.customizer_app_domain}scripts/bigcommerce/product.js`,
-  //   "auto_uninstall": true,
-  //   "load_method": "default",
-  //   "location": "footer",
-  //   "visibility": "storefront",
-  //   "kind": "src",
-  //   "consent_category": "essential",
-  //   "enabled": true
-  // };
   const scriptPayload = getScriptPayload(process.env.customizer_app_domain);
-  
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
   await bigcommerce.post(`/content/scripts`, scriptPayload);
@@ -201,6 +199,6 @@ export async function setWebHookOrder(session: SessionProps) {
       });
     }
   } catch (err: any) {
-    console.error("[Webhook] ❌ Failed to register order webhook:", err.response?.data || err.message);
+    console.error("[Webhook] Failed to register order webhook:", err.response?.data || err.message);
   }
 }
