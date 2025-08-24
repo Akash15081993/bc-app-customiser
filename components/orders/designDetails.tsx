@@ -1,4 +1,4 @@
-import { Box, Text, Flex } from "@bigcommerce/big-design";
+import { Box, Flex, Text  } from "@bigcommerce/big-design";
 
 const DesignDetails = ({ designData }: { designData: any }) => {
   if (!designData) return null;
