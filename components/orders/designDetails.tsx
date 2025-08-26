@@ -18,7 +18,7 @@ const JsonDesignUI = ({ data }: { data: any }) => {
         <Text bold>{ProductType?.toUpperCase()}</Text>
       </Flex>
 
-      {customizations?.krCustomizedPrice && (
+      {customizations?.krCustomizedPrice > 0 && (
         <Flex flexGap={'10px'}>
           <Text color="primary">Design Price:</Text>
           <Text bold>{customizations?.krCustomizedPrice?.toFixed(2)}</Text>

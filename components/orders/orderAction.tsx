@@ -87,7 +87,7 @@ const OrderActionDropdown = (props) => {
                         <Box><b>{product?.productName}</b></Box>
                         <Box><b>SKU:</b> {product?.productSku}</Box>
                         <Box><b>Quantity:</b> {JSON.parse(product?.productJson)?.quantity}</Box>
-                        <Box><b>Price:</b> {JSON.parse(product?.productJson)?.total_inc_tax?.toFixed(2)}</Box>
+                        <Box><b>Price:</b> {parseFloat(JSON.parse(product?.productJson)?.total_inc_tax)?.toFixed(2) || 0}</Box>
                         {product?.designId > 0 && (
                           <>
                             <Box><b>Design Id:</b> {product?.designId}</Box>
