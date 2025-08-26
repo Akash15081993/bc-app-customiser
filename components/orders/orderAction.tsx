@@ -9,6 +9,7 @@ import {
 } from "@bigcommerce/big-design";
 import { MoreHorizIcon } from "@bigcommerce/big-design-icons";
 import { useState } from "react";
+import DesignDetails from "./designDetails";
 
 const OrderActionDropdown = (props) => {
   const { id, orderId, jwtToken } = props;
@@ -78,7 +79,7 @@ const OrderActionDropdown = (props) => {
                 {
                   orderitems?.map((product) => (
                     <>
-                    <Flex flexGap={'25px'} alignItems={'flex-start'} >
+                    <Flex flexGap={'25px'} alignItems={'flex-start'} style={{borderBottom:'1px solid #3C64F4', paddingBottom:'30px', marginBottom:'30px'}} >
                       <Box style={{border:'1px solid #ccc'}}>
                         { product?.previewUrl != null ? <img src={product?.previewUrl} alt="" width={120} /> : <img src={'/assets/coming-soon-img.gif'} alt="" width={120} height={80} style={{objectFit:'contain'}} /> }
                       </Box>
@@ -86,13 +87,19 @@ const OrderActionDropdown = (props) => {
                         <Box><b>{product?.productName}</b></Box>
                         <Box><b>SKU:</b> {product?.productSku}</Box>
                         <Box><b>Quantity:</b> {JSON.parse(product?.productJson)?.quantity}</Box>
+                        <Box><b>Price:</b> {JSON.parse(product?.productJson)?.total_inc_tax}</Box>
                         {product?.designId > 0 && (
                           <>
                             <Box><b>Design Id:</b> {product?.designId}</Box>
-                            <Box style={{wordBreak:"break-word"}}>
+
+                            <Box style={{wordBreak:"break-word"}} marginTop={"large"}>
+                              <b>Design Area:</b> 
+                              <DesignDetails data={JSON.parse(product?.designArea)} />
+                            </Box> 
+                            {/* <Box style={{wordBreak:"break-word"}}>
                               <b>Design Area:</b> <br />
                               {product?.designArea}
-                            </Box>
+                            </Box> */}
                           </>
                         )}
                       </Flex>
