@@ -114,7 +114,7 @@ const ProductForm = () => {
     const fallback = "/assets/coming-soon-img.gif";
 
     return (
-      <img src={thumbnail || fallback} width={40} height={40} alt="Product" />
+      <img src={thumbnail || fallback} width={40} height={40} alt="Product" style={{ objectFit: "contain" }} />
     );
   };
 
