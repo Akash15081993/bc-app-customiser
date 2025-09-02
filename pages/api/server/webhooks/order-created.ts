@@ -90,6 +90,12 @@ export default async function handler(
       return res.status(200).send("ok");
     }
 
+    //Check allready exits same recode
+    const [existing] = await mysqlQuery("SELECT id FROM bcOrders WHERE orderId = ? AND storeHash = ?", [bcOrder.id, storeHash]) as any[];
+    if(existing === true){
+      return res.status(200).send("ok");
+    }
+
     //save order
     const result = await mysqlQuery(
       "INSERT INTO bcOrders (storeHash, orderId, order_total_inc_tax, order_total_ex_tax, order_items_total, customerId, order_json) VALUES (?,?,?,?,?,?,?)",
@@ -105,8 +111,6 @@ export default async function handler(
     );
 
     const newOrderId = result.insertId;
-
-    
 
     for (const item of lineItems) {
       const designId = getOptionValue(item, languageEN?.modifierDisplayNames?.designId);
