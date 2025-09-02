@@ -21,7 +21,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           [storeHash, limit, offset]
         ),
         mysqlQuery(
-          "SELECT COUNT(id) as total FROM bcOrders WHERE storeHash = ? GROUP BY orderId",
+          "SELECT COUNT(DISTINCT orderId) AS total FROM bcOrders WHERE storeHash = ?",
           [storeHash]
         ),
       ]);
