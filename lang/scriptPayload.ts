@@ -1,8 +1,8 @@
 export function getScriptPayload(appDomain: string) {
   return {
-    name: "KR Customizer",
-    description: "KR Customizer customizer app Script",
-    html: `<script>
+    "name": "KR Customizer",
+    "description": "KR Customizer customizer app Script",
+    "html": `<script>
     window.krcustomizer_config = {
       "store_hash": "{{settings.store_hash}}",
       "channel_id": "{{settings.channel_id}}",
@@ -16,12 +16,12 @@ export function getScriptPayload(appDomain: string) {
       }
     </script>
     <script src="${appDomain}/scripts/bigcommerce/product.js" defer></script>`,
-    auto_uninstall: true,
-    load_method: "default",
-    location: "footer",
-    visibility: "all_pages",
-    kind: "script_tag",
-    consent_category: "essential",
-    enabled: true,
+    "auto_uninstall": true,
+    "load_method": "default",
+    "location": "footer",
+    "visibility": "all_pages",
+    "kind": "script_tag",
+    "consent_category": "essential",
+    "enabled": true,
   };
 }

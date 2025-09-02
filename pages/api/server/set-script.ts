@@ -20,7 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
     }
 
-
     // -------------------------
     // Ensure Order Webhook
     // -------------------------
