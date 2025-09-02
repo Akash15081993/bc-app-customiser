@@ -176,11 +176,22 @@ export async function setScriptManager(session: SessionProps) {
   if (!accessToken || !scope) return null;
   const storeHash = context?.split("/")[1] || "";
   
-  const scriptPayload = getScriptPayload(process.env.customizer_app_domain);
+  //const scriptPayload = getScriptPayload(process.env.customizer_app_domain);
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
-
+  const scriptPayload = {
+      "name": "KR Customizer",
+      "description": "KR Customizer customizer app Script",
+      "html": "\n<script>\nwindow.krcustomizer_config = {\n  \"store_hash\": \"{{settings.store_hash}}\",\n  \"channel_id\": \"{{settings.channel_id}}\",\n  \"currencyCode\": \"{{settings.money.currency_token}}\",\n  \"page_type\": \"{{page_type}}\",\n  \"storefront_api\": \"{{settings.storefront_api.token}}\",\n  \"customer_id\": \"{{#if customer}}{{customer.id}}{{else}}0{{/if}}\",\n  \"customer_email\": \"{{#if customer}}{{customer.email}}{{else}}0{{/if}}\",\n  \"product_id\": \"{{product.id}}\",\n  \"product_sku\": \"{{product.sku}}\"\n};\n</script>\n<script src=\"https://your-app.com/scripts/bigcommerce/product.js\" defer></script>\n",
+      "auto_uninstall": true,
+      "load_method": "default",
+      "location": "footer",
+      "visibility": "all_pages",
+      "kind": "script_tag",
+      "consent_category": "essential",
+      "enabled": true
+    };
+  await bigcommerce.post(`/content/scripts`, scriptPayload);
 }
 
 export async function setWebHookOrder(session: SessionProps) {
