@@ -1,7 +1,7 @@
 const languageEN = {
   appDetails : {
     name: "KR Customizer",
-    email: "Support@krcustomizer.com"
+    email: "support@krcustomizer.com"
   },
   modifierDisplayNames : {
     designId: "Design Id",

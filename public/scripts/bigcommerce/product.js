@@ -257,7 +257,7 @@ document.addEventListener("click", async function (e) {
         });
 
         try {
-            const scriptAppUrl = "https://customizer-frontend-ten.vercel.app/bc-app/bc-customiser-app.umd.js";
+            const scriptAppUrl = "https://front.krcustomizer.com/bc-app/bc-customiser-app.umd.js";
             const productData = await productWithSelectedOptions(kr_store_form_data);
 
             //Mount App Start
