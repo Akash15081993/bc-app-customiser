@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if(!exists) {
         const scriptPayload = getScriptPayload(process.env.customizer_app_domain);
-        await bigcommerce.post(`/content/scripts`, scriptPayload);
+        await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
     }
 
 
@@ -43,7 +43,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (err: any) {
     console.error("set-script error", err?.response?.data || err);
-    
-return res.status(500).json({ error: "Failed to set script" });
+    return res.status(500).json({ error: "Failed to set script" });
   }
 }

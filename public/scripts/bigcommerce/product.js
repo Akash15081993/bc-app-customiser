@@ -1,6 +1,6 @@
 
 const krAppConfig = window?.krcustomizer_config;
-console.log('krAppConfig 20');
+console.log('krAppConfig');
 console.log(krAppConfig);
 
 const kr_endpoint = "https://app.krcustomizer.com/";

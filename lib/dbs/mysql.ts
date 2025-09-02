@@ -179,7 +179,7 @@ export async function setScriptManager(session: SessionProps) {
   const scriptPayload = getScriptPayload(process.env.customizer_app_domain);
   //Add script at Script Manager 
   const bigcommerce = bigcommerceClient(accessToken, storeHash);
-  await bigcommerce.post(`/content/scripts`, scriptPayload);
+  await bigcommerce.post(`/content/scripts`, JSON.stringify(scriptPayload));
 
 }
 
