@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: "Order ID is required" });
     }
 
-    const rows = await mysqlQuery("SELECT `id`,`orderId`,`order_items_total`, order_total_inc_tax, order_total_ex_tax FROM bcOrders WHERE storeHash = ? AND orderId = ? ",[storeHash, searchOrderId]);
+    const rows = await mysqlQuery("SELECT `id`,`orderId`,`order_items_total`, order_total_inc_tax, order_total_ex_tax FROM bcOrders WHERE storeHash = ? AND orderId = ? GROUP BY orderId ",[storeHash, searchOrderId]);
 
     res.status(200).json({
         status: true,

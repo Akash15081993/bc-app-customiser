@@ -15,7 +15,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
       const { orderId } = req.body;
 
-      const [items]: any = await Promise.all([mysqlQuery("SELECT `productId`,`productName`,`productSku`,`designId`,`designArea`,`previewUrl`, `productJson` FROM `bcOrderProducts` WHERE `storeHash` = ? AND `orderId` = ?",[storeHash, orderId])]);
+      const [items]: any = await Promise.all([mysqlQuery("SELECT `productId`,`productName`,`productSku`,`designId`,`designArea`,`previewUrl`, `productJson` FROM `bcOrderProducts` WHERE `storeHash` = ? AND `orderId` = ? GROUP BY orderId",[storeHash, orderId])]);
 
       res.status(200).json({
         status: true,
