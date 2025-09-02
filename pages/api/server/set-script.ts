@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { bigcommerceClient, getSession } from "@lib/auth";
-import { getScriptPayload } from "lang/scriptPayload";
+//import { getScriptPayload } from "lang/scriptPayload";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
