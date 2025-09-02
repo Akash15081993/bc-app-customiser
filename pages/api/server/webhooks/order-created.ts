@@ -95,6 +95,9 @@ export default async function handler(
     if(existing === true){
       return res.status(200).send("ok");
     }
+    if(existing?.length > 0){
+      return res.status(200).send("ok");
+    }
 
     //save order
     const result = await mysqlQuery(
