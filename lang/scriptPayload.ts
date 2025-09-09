@@ -15,7 +15,7 @@ window.krcustomizer_config = {
     "product_sku": "{{product.sku}}"
     }
 </script>
-<script src="${appDomain}/scripts/bigcommerce/product.js" defer></script>`,
+<script src="${appDomain}scripts/bigcommerce/product.js" defer></script>`,
     auto_uninstall: true,
     load_method: "default",
     location: "footer",
