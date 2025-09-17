@@ -1,4 +1,5 @@
 const languageEN = {
+  appApiToken : "kusheldigi-admin",
   appDetails : {
     name: "KR Customizer",
     email: "support@krcustomizer.com"
