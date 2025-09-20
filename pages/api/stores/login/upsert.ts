@@ -32,7 +32,7 @@ export default async function loginHandler(req: NextApiRequest, res: NextApiResp
     );
 
     let recordId;
-
+    let message = "Success added."
     if (existingRecords.length > 0) {
       // Update existing record
       recordId = existingRecords[0].id;
@@ -42,6 +42,7 @@ export default async function loginHandler(req: NextApiRequest, res: NextApiResp
          WHERE id = ?`,
         [firstName, lastName, phone, storeUrl, storeName, email, recordId]
       );
+      message = "Success update."
     } else {
       // Insert new record
       const insertResult = await mysqlQuery(
@@ -51,9 +52,10 @@ export default async function loginHandler(req: NextApiRequest, res: NextApiResp
         [platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email]
       );
       recordId = insertResult.insertId;
+      message = "Success added."
     }
 
-    res.status(200).json({ status: true, data: { id: recordId }, message: "Success." });
+    res.status(200).json({ status: true, data: { id: recordId }, message: message });
   } catch (error) {
     console.error('DB Error:', error);
     res.status(500).json({ status: false, message: 'Internal server error' });
