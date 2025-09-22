@@ -32,7 +32,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
             const newId = result.insertId;
 
-            res.status(200).json({ status: true, data : { id: newId, productSku, productName, }, message: "Product added successfully." });
+            res.status(200).json({ status: true, data : { id: newId, productId, productSku, productName, }, message: "Product added successfully." });
 
         } catch (error) {
             console.error('DB Error:', error);
