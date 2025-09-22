@@ -5,42 +5,59 @@ import languageEN from 'lang/en';
 
 const checkRate = rateLimit(12, 60 * 1000); // 12 requests per minute per IP
 
-export default async function list(req: NextApiRequest, res: NextApiResponse) {
-    try {
-        
-        // Only allow POST
-        if (req.method !== 'POST') {
-            return res.status(405).json({ status: false, message: 'Method not allowed' });
-        }
-
-        const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress) as string;
-        if (!checkRate(ip)) {
-            return res.status(429).json({ status: false, message: 'Too many requests, slow down' });
-        }
-
-        try {
-
-            const { platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email, apiToken } = req.body;
-
-            if(storeHash == "") return res.status(401).json({ status: false, message: 'Unauthorized' });
-
-            const apiTokenPrefix = languageEN?.appApiToken+"-login";
-            if(apiTokenPrefix != apiToken){ return res.status(401).json({ status: false, message: 'Unauthorized Token' }); }
-
-            //save data
-            const result = await mysqlQuery("INSERT INTO loginMaster (platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email]);
-
-            const newId = result.insertId;
-
-            res.status(200).json({ status: true, data : { id: newId }, message: "Success." });
-
-        } catch (error) {
-            console.error('DB Error:', error);
-            res.status(500).json({ status: false, message: 'Internal server error' });
-        }
-
-    } catch (error) {
-        const { message, response } = error;
-        res.status(response?.status || 500).json({ status: false, message });
+export default async function loginHandler(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ status: false, message: 'Method not allowed' });
     }
+
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress) as string;
+    if (!checkRate(ip)) {
+      return res.status(429).json({ status: false, message: 'Too many requests, slow down' });
+    }
+
+    const { platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email, apiToken } = req.body;
+
+    if (!storeHash) return res.status(401).json({ status: false, message: 'Unauthorized' });
+
+    const apiTokenPrefix = languageEN?.appApiToken + "-login";
+    if (apiTokenPrefix !== apiToken) {
+      return res.status(401).json({ status: false, message: 'Unauthorized Token' });
+    }
+
+    // Check if record already exists
+    const existingRecords = await mysqlQuery(
+      "SELECT id FROM loginMaster WHERE platform = ? AND storeHash = ?",
+      [platform, storeHash]
+    );
+
+    let recordId;
+    let message = "Success added."
+    if (existingRecords.length > 0) {
+      // Update existing record
+      recordId = existingRecords[0].id;
+      await mysqlQuery(
+        `UPDATE loginMaster 
+         SET firstName = ?, lastName = ?, phone = ?, storeUrl = ?, storeName = ?, email = ? 
+         WHERE id = ?`,
+        [firstName, lastName, phone, storeUrl, storeName, email, recordId]
+      );
+      message = "Success update."
+    } else {
+      // Insert new record
+      const insertResult = await mysqlQuery(
+        `INSERT INTO loginMaster 
+         (platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [platform, storeHash, firstName, lastName, phone, storeUrl, storeName, email]
+      );
+      recordId = insertResult.insertId;
+      message = "Success added."
+    }
+
+    res.status(200).json({ status: true, data: { id: recordId }, message: message });
+  } catch (error) {
+    console.error('DB Error:', error);
+    res.status(500).json({ status: false, message: 'Internal server error' });
+  }
 }
