@@ -43,7 +43,7 @@ export default async function listProducts(req: NextApiRequest, res: NextApiResp
 
     //Fetch products with pagination
     const products = await mysqlQuery(
-      `SELECT id, productSku, productName, productImage 
+      `SELECT id, productId, productSku, productName, productImage 
        FROM products 
        ${whereClause} 
        ORDER BY id DESC 
