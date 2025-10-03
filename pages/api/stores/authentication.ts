@@ -38,9 +38,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         [storeHash]
       );
       if (appSettings?.length === 0) {
-        return res
-          .status(400)
-          .json({ status: false, message: "Default settings." });
+        return res.status(400).json({ status: true, message: "Default settings." });
       }
 
       return res.status(200).json({
