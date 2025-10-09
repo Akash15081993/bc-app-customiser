@@ -14,7 +14,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
     const bodyData = req.body as any;
     const storeHash = bodyData?.storeHash;
-    const product_id = bodyData?.product_id;
+    const productId = bodyData?.productId;
 
     if (!storeHash) {
       return res.status(400).json({ status: false, message: 'storeHash is required' });
@@ -36,7 +36,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     //Product is Customize
     const productIsValid = await mysqlQuery(
       "SELECT id FROM `products` WHERE `visible` = 1 AND `storeHash` = ? AND `productId` = ?",
-      [storeHash, product_id]
+      [storeHash, productId]
     );
     if (productIsValid?.length === 0) {
       return res.status(400).json({
