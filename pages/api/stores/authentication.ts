@@ -35,7 +35,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
     //Product is Customize
     const productIsValid = await mysqlQuery(
-      "SELECT id FROM `products` WHERE `visible` = 1 AND `storeHash` = ? AND `productId` = ?",
+      "SELECT id FROM `products` WHERE `visible` = 1 AND currentStatus = 0, AND `storeHash` = ? AND `productId` = ?",
       [storeHash, productId]
     );
     if (productIsValid?.length === 0) {
