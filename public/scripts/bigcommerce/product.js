@@ -65,7 +65,7 @@ function appendCSS(cssCode) {
 
 //App authentication
 async function appAuthentication() {
-    const bodyPaylod = { "kr_store_hash": kr_store_hash, "bc_storefront_token": bc_storefront_token };
+    const bodyPaylod = { "kr_store_hash": kr_store_hash, "bc_storefront_token": bc_storefront_token, "kr_product_id": kr_product_id };
     const reqAuthentication = await fetch(`${kr_endpoint}api/widget/authentication`, {
         headers: { "Content-Type": "application/json" },
         method: "POST",

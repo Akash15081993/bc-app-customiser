@@ -21,6 +21,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     const bodyData = req.body as any;
     const bc_storefront_token = bodyData?.bc_storefront_token;
     const kr_store_hash = bodyData?.kr_store_hash;
+    const kr_product_id = bodyData?.kr_product_id;
 
     if (!bc_storefront_token) {
       return res.status(400).json({ status: false, message: "Missing token" });
@@ -48,6 +49,19 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
           status: false,
           message:
             "Your subscription is not valid. Please contact to administrator.",
+        });
+      }
+
+      //Product is Customize
+      const productIsValid = await mysqlQuery(
+        "SELECT id FROM `products` WHERE `visible` = 1 AND `storeHash` = ? AND `productId` = ?",
+        [kr_store_hash, kr_product_id]
+      );
+      if (productIsValid?.length === 0) {
+        return res.status(400).json({
+          status: false,
+          message:
+            "Your product is not ready for customization. Please contact the administrator.",
         });
       }
 
