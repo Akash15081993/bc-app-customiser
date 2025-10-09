@@ -14,23 +14,37 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
     const bodyData = req.body as any;
     const storeHash = bodyData?.storeHash;
+    const product_id = bodyData?.product_id;
 
     if (!storeHash) {
       return res.status(400).json({ status: false, message: 'storeHash is required' });
     }
 
     //Subscription validation
-      const subscription = await mysqlQuery(
-        "SELECT id FROM `loginMaster` WHERE `subscription` = 1 AND `storeHash` = ?",
-        [storeHash]
-      );
-      if (subscription?.length === 0) {
-        return res.status(400).json({
-          status: false,
-          message:
-            "Your subscription is not valid. Please contact to administrator.",
-        });
-      }
+    const subscription = await mysqlQuery(
+      "SELECT id FROM `loginMaster` WHERE `subscription` = 1 AND `storeHash` = ?",
+      [storeHash]
+    );
+    if (subscription?.length === 0) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Your subscription is not valid. Please contact to administrator.",
+      });
+    }
+
+    //Product is Customize
+    const productIsValid = await mysqlQuery(
+      "SELECT id FROM `products` WHERE `visible` = 1 AND `storeHash` = ? AND `productId` = ?",
+      [storeHash, product_id]
+    );
+    if (productIsValid?.length === 0) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Your product is not ready for customization. Please contact the administrator.",
+      });
+    }
 
       //Get appSettings
       const appSettings = await mysqlQuery(
