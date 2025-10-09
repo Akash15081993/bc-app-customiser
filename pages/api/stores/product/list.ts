@@ -33,7 +33,7 @@ export default async function listProducts(req: NextApiRequest, res: NextApiResp
     const offset = (pageNum - 1) * limitNum;
 
     //Build WHERE clause
-    let whereClause = "WHERE storeHash = ?";
+    let whereClause = "WHERE currentStatus = 0 AND storeHash = ?";
     const params: any[] = [storeHash];
 
     if (searchTerm && searchTerm.trim() !== "") {
@@ -45,7 +45,7 @@ export default async function listProducts(req: NextApiRequest, res: NextApiResp
     const products = await mysqlQuery(
       `SELECT id, productId, productSku, productName, productImage 
        FROM products 
-       ${whereClause} 
+       ${whereClause}  
        ORDER BY id DESC 
        LIMIT ? OFFSET ?`,
       [...params, limitNum, offset]

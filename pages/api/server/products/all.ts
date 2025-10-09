@@ -18,11 +18,11 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
       const [items, totalResult]: any = await Promise.all([
         mysqlQuery(
-          "SELECT `id`,`productId`,`productSku`,`productName`,`productImage` FROM products WHERE storeHash = ?  ORDER BY id DESC LIMIT ? OFFSET ?",
+          "SELECT `id`,`productId`,`productSku`,`productName`,`productImage` FROM products WHERE currentStatus = 0 AND storeHash = ?  ORDER BY id DESC LIMIT ? OFFSET ?",
           [storeHash, limit, offset]
         ),
         mysqlQuery(
-          "SELECT COUNT(id) as total FROM products WHERE storeHash = ?",
+          "SELECT COUNT(id) as total FROM products WHERE currentStatus = 0 AND storeHash = ?",
           [storeHash]
         ),
       ]);

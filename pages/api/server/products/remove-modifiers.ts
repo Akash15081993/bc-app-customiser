@@ -3,6 +3,29 @@ import { bigcommerceClient, getSession } from '@lib/auth';
 import { mysqlQuery } from '@lib/dbs/mysql';
 import languageEN from 'lang/en';
 
+function getClientIp(req: NextApiRequest): string {
+  // Check standard proxy headers first
+  const xForwardedFor = req.headers['x-forwarded-for'];
+  if (xForwardedFor) {
+    const ips = Array.isArray(xForwardedFor)
+      ? xForwardedFor[0]
+      : xForwardedFor.split(',')[0];
+    return ips.trim();
+  }
+
+  // Cloudflare header
+  const cfConnectingIp = req.headers['cf-connecting-ip'];
+  if (cfConnectingIp && typeof cfConnectingIp === 'string') return cfConnectingIp;
+
+  // Nginx / other proxies
+  const xRealIp = req.headers['x-real-ip'];
+  if (xRealIp && typeof xRealIp === 'string') return xRealIp;
+
+  // Fallback to socket address
+  const remoteAddress = req.socket?.remoteAddress || '';
+  return remoteAddress.replace(/^::ffff:/, ''); // Normalize IPv4-mapped IPv6
+}
+
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
     try {
         
@@ -19,6 +42,9 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             if (!productId || isNaN(Number(productId)) || Number(productId) <= 0) {
                 return res.status(400).json({ status : false, message: "Invalid product ID." });
             }
+
+            //Get the real client IP
+            const ipAddress = getClientIp(req);
 
             const { modifierDisplayNames } = languageEN;
 
@@ -59,7 +85,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             }
 
             //First Delete Product
-            await mysqlQuery('DELETE FROM products WHERE storeHash = ? AND id = ?',[storeHash, id]);
+            //await mysqlQuery('DELETE FROM products WHERE storeHash = ? AND id = ?',[storeHash, id]);
+            await mysqlQuery("UPDATE products SET currentStatus = 3, ipAddress = ? WHERE storeHash = ? AND id = ?", [ipAddress, storeHash, id]);
 
             res.status(200).json({
                 status : true,
