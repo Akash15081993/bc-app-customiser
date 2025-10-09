@@ -16,7 +16,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
             const productBody = { storeHash, userId : user.id, productId, productSku, productName };
             
             //First Delete Product
-            await mysqlQuery('DELETE FROM products WHERE storeHash = ? AND productId = ?',[storeHash, productId]);
+            //await mysqlQuery('DELETE FROM products WHERE storeHash = ? AND productId = ?',[storeHash, productId]);
+            await mysqlQuery("UPDATE products SET currentStatus = 0 WHERE storeHash = ? AND productId = ?", [storeHash, productId]);
 
             //Save product
             await mysqlQuery('REPLACE INTO products SET ?', productBody);

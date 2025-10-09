@@ -30,8 +30,9 @@ export default async function remove(req: NextApiRequest, res: NextApiResponse) 
       }
 
       // delete product record
-      const q = "DELETE FROM products WHERE id = ? AND storeHash = ?";
-      const params = [id, storeHash];
+      //const q = "DELETE FROM products WHERE id = ? AND storeHash = ?";
+      const q = "UPDATE products SET currentStatus = 3, ipAddress = ? WHERE id = ? AND storeHash = ?";
+      const params = [ip, id, storeHash];
 
       const result = await mysqlQuery(q, params);
 
