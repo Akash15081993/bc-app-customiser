@@ -17,7 +17,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     const productId = bodyData?.productId;
 
     if (!storeHash) {
-      return res.status(400).json({ status: false, message: 'storeHash is required' });
+      return res.status(200).json({ status: false, message: 'storeHash is required' });
     }
 
     //Subscription validation
@@ -26,7 +26,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       [storeHash]
     );
     if (subscription?.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         status: false,
         message:
           "Your subscription is not valid. Please contact to administrator.",
@@ -39,7 +39,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       [storeHash, productId]
     );
     if (productIsValid?.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         status: false,
         message:
           "Your product is not ready for customization. Please contact the administrator.",
@@ -52,7 +52,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         [storeHash]
       );
       if (appSettings?.length === 0) {
-        return res.status(400).json({ status: true, message: "Default settings." });
+        return res.status(200).json({ status: true, message: "Default settings." });
       }
 
       return res.status(200).json({
