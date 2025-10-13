@@ -22,7 +22,7 @@ export default async function listProducts(req: NextApiRequest, res: NextApiResp
     }
 
     //Fetch products with pagination
-    const productsSaved = await mysqlQuery(`SELECT product_data FROM productSaved WHERE "storeHash" = ? AND "id" = ?`, [storeHash, designId]);
+    const productsSaved = await mysqlQuery(`SELECT product_data FROM productSaved WHERE storeHash = ? AND id = ?`, [storeHash, designId]);
 
     if (productsSaved.length === 0) {
       return res.status(404).json({ status: false, message: 'Saved product not found' });
