@@ -37,14 +37,14 @@ export default async function listOrders(req: NextApiRequest, res: NextApiRespon
     const params: any[] = [storeHash];
 
     if (searchTerm && searchTerm.trim() !== "") {
-      whereClause += " AND (orderId LIKE ? OR customerId LIKE ?)";
-      params.push(`%${searchTerm}%`, `%${searchTerm}%`);
+      whereClause += " AND (orderId LIKE ? OR customerId LIKE ? OR orderNumber LIKE ?)";
+      params.push(`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`);
     }
 
     //Fetch orders
     const orders = await mysqlQuery(
       `SELECT id, storeHash, orderId, order_total_inc_tax, order_total_ex_tax, 
-              order_items_total, customerId, order_json, createdAt
+              order_items_total, customerId, order_json, createdAt, orderNumber
        FROM bcOrders
        ${whereClause}
        ORDER BY id DESC
@@ -52,7 +52,7 @@ export default async function listOrders(req: NextApiRequest, res: NextApiRespon
       [...params, limitNum, offset]
     );
 
-    // ✅ Count total
+    // Count total
     const countResult = await mysqlQuery(
       `SELECT COUNT(*) as total FROM bcOrders ${whereClause}`,
       params

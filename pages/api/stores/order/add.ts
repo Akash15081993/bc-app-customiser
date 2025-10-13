@@ -19,6 +19,7 @@ export default async function addOrder(req: NextApiRequest, res: NextApiResponse
     const {
       storeHash,
       orderId,
+      orderNumber = 0,
       order_total_inc_tax,
       order_total_ex_tax,
       order_items_total,
@@ -40,9 +41,9 @@ export default async function addOrder(req: NextApiRequest, res: NextApiResponse
     // Insert order
     const result = await mysqlQuery(
       `INSERT INTO bcOrders
-        (storeHash, orderId, order_total_inc_tax, order_total_ex_tax, order_items_total, customerId, order_json)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [storeHash, orderId, order_total_inc_tax, order_total_ex_tax, order_items_total, customerId, order_json]
+        (storeHash, orderId, orderNumber, order_total_inc_tax, order_total_ex_tax, order_items_total, customerId, order_json)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [storeHash, orderId, orderNumber, order_total_inc_tax, order_total_ex_tax, order_items_total, customerId, order_json]
     );
 
     const newId = result.insertId;
