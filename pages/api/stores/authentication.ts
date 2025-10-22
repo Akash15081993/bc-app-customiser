@@ -48,7 +48,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
       //Get appSettings
       const appSettings = await mysqlQuery(
-        "SELECT enableShare, designerButtonName, designerButton, cssCode FROM `appSettings` WHERE `storeHash` = ?",
+        "SELECT enableShare, designerButtonName, designerButton, addtocartForm, cssCode FROM `appSettings` WHERE `storeHash` = ?",
         [storeHash]
       );
       if (appSettings?.length === 0) {
