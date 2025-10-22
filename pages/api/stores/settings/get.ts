@@ -30,7 +30,7 @@ export default async function getSettings(req: NextApiRequest, res: NextApiRespo
 
     // Fetch settings
     const settings = await mysqlQuery(
-      "SELECT storeHash, userId, enableShare, designerButtonName, designerButton, cssCode FROM appSettings WHERE storeHash = ?",
+      "SELECT storeHash, userId, enableShare, designerButtonName, designerButton, addtocartForm, cssCode FROM appSettings WHERE storeHash = ?",
       [storeHash]
     );
 

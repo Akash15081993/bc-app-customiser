@@ -22,6 +22,7 @@ export default async function saveSettings(req: NextApiRequest, res: NextApiResp
       enableShare,
       designerButtonName,
       designerButton,
+      addtocartForm,
       cssCode,
       apiToken
     } = req.body;
@@ -46,17 +47,17 @@ export default async function saveSettings(req: NextApiRequest, res: NextApiResp
       //Update existing record
       await mysqlQuery(
         `UPDATE appSettings
-         SET userId = ?, enableShare = ?, designerButtonName = ?, designerButton = ?, cssCode = ?
+         SET userId = ?, enableShare = ?, designerButtonName = ?, designerButton = ?, addtocartForm = ?, cssCode = ?
          WHERE storeHash = ?`,
-        [userId, enableShare, designerButtonName, designerButton, cssCode, storeHash]
+        [userId, enableShare, designerButtonName, designerButton, addtocartForm, cssCode, storeHash]
       );
     } else {
       //Insert new record
       await mysqlQuery(
         `INSERT INTO appSettings
-          (storeHash, userId, enableShare, designerButtonName, designerButton, cssCode)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [storeHash, userId, enableShare, designerButtonName, designerButton, cssCode]
+          (storeHash, userId, enableShare, designerButtonName, designerButton, addtocartForm, cssCode)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [storeHash, userId, enableShare, designerButtonName, designerButton, addtocartForm, cssCode]
       );
     }
 
