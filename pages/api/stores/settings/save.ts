@@ -16,6 +16,7 @@ export default async function saveSettings(req: NextApiRequest, res: NextApiResp
       return res.status(429).json({ status: false, message: 'Too many requests, slow down' });
     }
 
+    
     const {
       storeHash,
       userId,
