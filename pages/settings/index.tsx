@@ -89,31 +89,62 @@ return;
     setPageSuccess("General settings updated successfully.");
   };
 
-  const validateCss = (value: string) => {
+   const validateCss = (value: string | undefined): string => {
+    if (!value) return "";
+
     if (value.length > MAX_LENGTH) {
       return `CSS exceeds ${MAX_LENGTH} characters`;
     }
 
-    // Basic SQL injection patterns (not foolproof, but helpful)
-    const sqlKeywords = /(insert|update|delete|drop|union|--)/i;
-    if (sqlKeywords.test(value)) {
-      return "Invalid content detected in CSS (SQL keywords not allowed)";
+    // Check for HTML tags
+    const hasHtmlTags = /<[^>]*>/.test(value);
+    if (hasHtmlTags) {
+      return "HTML tags are not allowed in CSS";
     }
 
-    // Optional: block @import or javascript: URLs
-    const dangerousPatterns = /(@import|javascript:|expression\()/i;
-    if (dangerousPatterns.test(value)) {
-      return "Unsafe CSS detected (e.g., @import or javascript:)";
+    // Define dangerous patterns that could execute code
+    const dangerousPatterns = [
+      { pattern: /javascript:/i, message: "JavaScript URLs are not allowed" },
+      { pattern: /data:text\/html/i, message: "Data URLs with HTML are not allowed" },
+      { pattern: /expression\(/i, message: "CSS expressions are not allowed" },
+      { pattern: /eval\(/i, message: "eval function is not allowed" },
+      { pattern: /<script/i, message: "Script tags are not allowed" },
+      { pattern: /onload=/i, message: "onload events are not allowed" },
+      { pattern: /onerror=/i, message: "onerror events are not allowed" },
+      { pattern: /onclick=/i, message: "onclick events are not allowed" },
+      { pattern: /url\(['"]?data:/i, message: "Data URLs in url() are not allowed" },
+      { pattern: /@import\s+url\(/i, message: "URL imports are not allowed" },
+    ];
+
+    for (const { pattern, message } of dangerousPatterns) {
+      if (pattern.test(value)) {
+        return `Unsafe CSS: ${message}`;
+      }
     }
 
-    return ""; // No error
+    return "";
   };
-
+  
   const handleChangeCssCode = (value: string) => {
     const validationError = validateCss(value);
     setError(validationError);
     setCssCode(value);
   };
+
+  const handleInputChange_btn_des = () => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const hasHtml = /<[^>]*>/.test(value);
+      const cleanValue = value.replace(/<[^>]*>/g, '');
+      setDesignerButtonName(cleanValue || "");
+  };
+  
+  const handleInputChange_btn_selector = () => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const hasHtml = /<[^>]*>/.test(value);
+      const cleanValue = value.replace(/<[^>]*>/g, '');
+      setDesignerButton(cleanValue || "");
+  };
+
 
   if (saveButtonLoading) return <Loading />;
 
@@ -161,9 +192,7 @@ return;
           placeholder="Example: .add-to-cart-buttons"
           width="small"
           maxLength={30}
-          onChange={(e) => {
-            setDesignerButtonName(e.target.value);
-          }}
+          onChange={(e) => { handleInputChange_btn_des(); }}
         />
       </Panel>
 
@@ -177,9 +206,7 @@ return;
           placeholder="Example: .add-to-cart-buttons"
           width="small"
           maxLength={200}
-          onChange={(e) => {
-            setDesignerButton(e.target.value);
-          }}
+          onChange={(e) => { handleInputChange_btn_selector(); }}
         />
       </Panel>
 
