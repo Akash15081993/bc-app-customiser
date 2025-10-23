@@ -86,7 +86,7 @@ async function appAuthentication() {
         if (cssCode != "") { appendCSS(cssCode); }
 
         //Button append
-        if(esignerButton != ""){
+        if(designerButton != ""){
             const designerButtonEle = document.querySelector(designerButton);
             if (designerButtonEle) {
                 designerButtonEle.insertAdjacentHTML('beforeend', customize_handel_button);
