@@ -86,9 +86,13 @@ async function appAuthentication() {
         if (cssCode != "") { appendCSS(cssCode); }
 
         //Button append
-        const designerButtonEle = document.querySelector(designerButton);
-        if (designerButtonEle) {
-            designerButtonEle.insertAdjacentHTML('beforeend', customize_handel_button);
+        if(esignerButton != ""){
+            const designerButtonEle = document.querySelector(designerButton);
+            if (designerButtonEle) {
+                designerButtonEle.insertAdjacentHTML('beforeend', customize_handel_button);
+            } else {
+                document.querySelector(".productView-options .form").insertAdjacentHTML('beforeend', customize_handel_button);
+            }
         } else {
             document.querySelector(".productView-options .form").insertAdjacentHTML('beforeend', customize_handel_button);
         }

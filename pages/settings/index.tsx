@@ -131,20 +131,17 @@ return;
     setCssCode(value);
   };
 
-  const handleInputChange_btn_des = () => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      const hasHtml = /<[^>]*>/.test(value);
-      const cleanValue = value.replace(/<[^>]*>/g, '');
-      setDesignerButtonName(cleanValue || "");
-  };
-  
-  const handleInputChange_btn_selector = () => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      const hasHtml = /<[^>]*>/.test(value);
-      const cleanValue = value.replace(/<[^>]*>/g, '');
-      setDesignerButton(cleanValue || "");
+  const handleInputChange_designerButtonName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cleanValue = value.replace(/<[^>]*>/g, '');
+    setDesignerButtonName(cleanValue || "");
   };
 
+  const handleInputChange_designerButton = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cleanValue = value.replace(/<[^>]*>/g, '');
+    setDesignerButton(cleanValue || "");
+  };
 
   if (saveButtonLoading) return <Loading />;
 
@@ -192,7 +189,7 @@ return;
           placeholder="Example: .add-to-cart-buttons"
           width="small"
           maxLength={30}
-          onChange={(e) => { handleInputChange_btn_des(); }}
+          onChange={handleInputChange_designerButtonName}
         />
       </Panel>
 
@@ -206,7 +203,7 @@ return;
           placeholder="Example: .add-to-cart-buttons"
           width="small"
           maxLength={200}
-          onChange={(e) => { handleInputChange_btn_selector(); }}
+          onChange={handleInputChange_designerButton}
         />
       </Panel>
 
