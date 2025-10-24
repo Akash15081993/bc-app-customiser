@@ -1,3 +1,4 @@
+//pages\settings\index.tsx
 import {
   Box,
   Button,
@@ -39,10 +40,13 @@ const Settings = () => {
 return;
     }
     const reqSettings = await fetch(
-      `/api/server/settings/get?context=${encodedContext}`,
+      `/api/server/settings/get`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${encodedContext}`
+        },
         body: null,
       }
     );
@@ -68,10 +72,13 @@ return;
     setPageSuccess("");
 
     const setSettings = await fetch(
-      `/api/server/settings/add?context=${encodedContext}`,
+      `/api/server/settings/add`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${encodedContext}`
+        },
         body: JSON.stringify({ enableShare, designerButtonName, designerButton, cssCode }),
       }
     );
