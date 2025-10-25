@@ -18,7 +18,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       if (!user) return res.status(401).json({ status: false, message: "Unauthorized" });
 
       //search Product
-      const products = await mysqlQuery("SELECT `storeHash`, `id`,`productId`,`productSku`,`productName`,`productImage` FROM products WHERE storeHash = ? AND (productSku LIKE ? OR productName LIKE ?) LIMIT 50", [storeHash, `%${searchTerm}%`, `%${searchTerm}%`] );
+      const products = await mysqlQuery("SELECT `storeHash`, `id`,`productId`,`productSku`,`productName`,`productImage` FROM products WHERE currentStatus = 0 AND storeHash = ? AND (productSku LIKE ? OR productName LIKE ?) LIMIT 50", [storeHash, `%${searchTerm}%`, `%${searchTerm}%`] );
       res.status(200).json({ status: true, products : products, message: "Success" });
 
     } else {
