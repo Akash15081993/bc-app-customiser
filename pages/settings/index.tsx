@@ -39,14 +39,9 @@ const Settings = () => {
       
 return;
     }
-    const reqSettings = await fetch(
-      `/api/server/settings/get`,
-      {
+    const reqSettings = await fetch(`/api/server/settings/get?context=${encodedContext}`,{
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${encodedContext}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: null,
       }
     );
@@ -71,15 +66,12 @@ return;
     setPageError("");
     setPageSuccess("");
 
-    const setSettings = await fetch(
-      `/api/server/settings/add`,
+     const setSettings = await fetch(
+      `/api/server/settings/add?context=${encodedContext}`,
       {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${encodedContext}`
-        },
-        body: JSON.stringify({ enableShare, designerButtonName, designerButton, cssCode }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enableShare, designerButton, cssCode }),
       }
     );
 
