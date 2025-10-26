@@ -109,18 +109,16 @@ export async function getSessionJWT(contextJwt: string) {
 }
 
 
-export async function getSession({ query: { context = '' } }: NextApiRequest) {
-    if (typeof context !== 'string') return;
-    const { context: storeHash, user } = decodePayload(context) as SessionProps;
+export async function getSession(contextJwt: string) {
+    if (typeof contextJwt !== 'string') return;
+    const { context: storeHash, user } = decodePayload(contextJwt) as SessionProps;
     const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
 
-    // Before retrieving session/ hitting APIs, check user
     if (!hasUser) {
         throw new Error('User is not available. Please login or ensure you have access permissions.');
     }
 
     const accessToken = await db.getStoreToken(storeHash);
-
     return { accessToken, storeHash, user };
 }
 
