@@ -77,7 +77,6 @@ export function decodePayloadJwt(encodedContext: string) {
         try {
             return jwt.verify(token, JWT_KEY);
         } catch (verifyError) {
-            console.log('JWT verify failed, using decode (development only):', verifyError.message);
             const decoded = jwt.decode(token);
             if (!decoded) {
                 throw new Error('Invalid JWT token');
