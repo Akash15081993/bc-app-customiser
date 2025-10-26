@@ -1,4 +1,3 @@
-
 const krAppConfig = window?.krcustomizer_config;
 console.log('krAppConfig');
 console.log(krAppConfig);
@@ -77,7 +76,7 @@ async function appAuthentication() {
         const appSettings = resultAuthentication?.appSettings;
         const cssCode = appSettings?.cssCode;
         const designerButton = appSettings?.designerButton;
-        const designerButtonName = appSettings?.designerButtonName != "" ? appSettings?.designerButtonName : "Customize";
+        const designerButtonName = appSettings?.designerButtonName != "" && typeof appSettings?.designerButtonName != "undefined" ? appSettings?.designerButtonName : "Customize";
         const enableShare = appSettings?.enableShare;
 
         const customize_handel_button = `<button type="button" class="button button--primary kr-customize-handel" data-kr-customize-handel>${designerButtonName}</button>`;

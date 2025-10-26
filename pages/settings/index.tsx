@@ -71,7 +71,7 @@ return;
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enableShare, designerButton, cssCode }),
+        body: JSON.stringify({ enableShare, designerButton, designerButtonName, cssCode }),
       }
     );
 
@@ -133,13 +133,13 @@ return;
   const handleInputChange_designerButtonName = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const cleanValue = value.replace(/<[^>]*>/g, '');
-    setDesignerButtonName(cleanValue || "");
+    setDesignerButtonName(cleanValue);
   };
 
   const handleInputChange_designerButton = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const cleanValue = value.replace(/<[^>]*>/g, '');
-    setDesignerButton(cleanValue || "");
+    setDesignerButton(cleanValue);
   };
 
   if (saveButtonLoading) return <Loading />;

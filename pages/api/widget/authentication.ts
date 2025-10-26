@@ -24,7 +24,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
     const kr_product_id = bodyData?.kr_product_id;
 
     if (!bc_storefront_token) {
-      return res.status(400).json({ status: false, message: "Missing token" });
+      return res.status(200).json({ status: false, message: "Missing token" });
     }
 
     const tokenSplit = bc_storefront_token?.split(".");
@@ -45,7 +45,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         [kr_store_hash]
       );
       if (subscription?.length === 0) {
-        return res.status(400).json({
+        return res.status(200).json({
           status: false,
           message:
             "Your subscription is not valid. Please contact to administrator.",
@@ -58,7 +58,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
         [kr_store_hash, kr_product_id]
       );
       if (productIsValid?.length === 0) {
-        return res.status(400).json({
+        return res.status(200).json({
           status: false,
           message:
             "Your product is not ready for customization. Please contact the administrator.",
@@ -72,8 +72,8 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
       );
       if (appSettings?.length === 0) {
         return res
-          .status(400)
-          .json({ status: false, message: "Default settings." });
+          .status(200)
+          .json({ status: true, message: "Default settings." });
       }
 
       return res.status(200).json({
