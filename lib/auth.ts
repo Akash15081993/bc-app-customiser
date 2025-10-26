@@ -59,19 +59,13 @@ export function setSession(session: SessionProps) {
 	db.setWebHookOrder(session);
 }
 
-export async function getSessionJWT(context: string | { query: { context: string } }) {
-    let contextString: string;
-    
-    // Handle both old and new formats
-    if (typeof context === 'string') {
-        contextString = context;
-    } else if (context && typeof context === 'object' && context.query && typeof context.query.context === 'string') {
-        contextString = context.query.context;
-    } else {
-        throw new Error('Invalid context format');
+
+export async function getSessionJWT(contextJwt: string) {
+    if (typeof contextJwt !== 'string') {
+        throw new Error('Context must be a string');
     }
     
-    const { context: storeHash, user } = decodePayload(contextString) as SessionProps;
+    const { context: storeHash, user } = decodePayload(contextJwt) as SessionProps;
     const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
 
     // Before retrieving session/ hitting APIs, check user
@@ -83,6 +77,7 @@ export async function getSessionJWT(context: string | { query: { context: string
 
     return { accessToken, storeHash, user };
 }
+
 
 export async function getSession({ query: { context = '' } }: NextApiRequest) {
     if (typeof context !== 'string') return;

@@ -58,7 +58,7 @@ const ProductForm = () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context: encodedContext, keyword: searchTerm, page, limit: perPage }),
+        body: JSON.stringify({ contextJwt: encodedContext, keyword: searchTerm, page, limit: perPage }),
       }
     );
 

@@ -8,12 +8,12 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
     if (req.method == "POST") {
 
-      const { context, searchTerm } = req.body || {};
+      const { contextJwt, searchTerm } = req.body || {};
 
       if (typeof searchTerm === "undefined" || searchTerm === "") {
         return res.status(400).json({ status: false, message: "Missing search query" });
       }
-      const { storeHash, user } = await getSessionJWT(context);
+      const { storeHash, user } = await getSessionJWT(contextJwt);
 
       if (!user) return res.status(401).json({ status: false, message: "Unauthorized" });
 
