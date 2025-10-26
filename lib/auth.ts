@@ -60,12 +60,43 @@ export function setSession(session: SessionProps) {
 }
 
 
+export function decodePayloadJwt(encodedContext: string) {
+    try {
+        if (!encodedContext) {
+            throw new Error('JWT token is empty');
+        }
+        
+        const token = encodedContext.replace(/^Bearer\s+/i, '');
+        
+        // Production - always verify
+        if (process.env.NODE_ENV === 'production') {
+            return jwt.verify(token, JWT_KEY);
+        }
+        
+        // Development - verify with decode fallback
+        try {
+            return jwt.verify(token, JWT_KEY);
+        } catch (verifyError) {
+            console.log('JWT verify failed, using decode (development only):', verifyError.message);
+            const decoded = jwt.decode(token);
+            if (!decoded) {
+                throw new Error('Invalid JWT token');
+            }
+            return decoded;
+        }
+    } catch (error) {
+        console.error('JWT processing failed:', error.message);
+        throw error;
+    }
+}
+
+
 export async function getSessionJWT(contextJwt: string) {
     if (typeof contextJwt !== 'string') {
         throw new Error('Context must be a string');
     }
     
-    const { context: storeHash, user } = decodePayload(contextJwt) as SessionProps;
+    const { context: storeHash, user } = decodePayloadJwt(contextJwt) as SessionProps;
     const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
 
     // Before retrieving session/ hitting APIs, check user
