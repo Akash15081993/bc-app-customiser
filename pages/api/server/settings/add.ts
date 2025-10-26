@@ -43,8 +43,7 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
       res.status(200).json({ status: true, message: "Success." });
     } catch (error) {
-		const { message } = error;
-      console.error("DB Error:", error);
+		  console.error("DB Error:", error);
       res.status(500).json({ status: false, message: "Internal server error.." });
     }
   } catch (error) {

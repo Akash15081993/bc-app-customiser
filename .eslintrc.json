@@ -35,6 +35,7 @@
     "react/react-in-jsx-scope": "off",
     "react-hooks/exhaustive-deps": "warn", //my custom
     "newline-before-return": "warn", //my custom - error
+    "no-mixed-spaces-and-tabs": "off", //my custom - error
     "sort-imports": [
       "error",
       {

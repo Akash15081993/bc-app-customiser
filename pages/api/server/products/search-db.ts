@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "@lib/auth";
+import { getSessionJWT } from "@lib/auth";
 import { mysqlQuery } from "@lib/dbs/mysql";
 
 export default async function list(req: NextApiRequest, res: NextApiResponse) {
@@ -8,12 +8,12 @@ export default async function list(req: NextApiRequest, res: NextApiResponse) {
 
     if (req.method == "POST") {
 
-      const { searchTerm } = req.body || {};
+      const { context, searchTerm } = req.body || {};
 
       if (typeof searchTerm === "undefined" || searchTerm === "") {
         return res.status(400).json({ status: false, message: "Missing search query" });
       }
-      const { storeHash, user } = await getSession(req);
+      const { storeHash, user } = await getSessionJWT(context);
 
       if (!user) return res.status(401).json({ status: false, message: "Unauthorized" });
 
