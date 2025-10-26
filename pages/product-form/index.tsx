@@ -54,11 +54,11 @@ const ProductForm = () => {
     setSerachButtonLoading(true);
     setpageLoading(false);
     const res = await fetch(
-      `/api/server/products/search`,
+      `/api/server/products/search?context=${encodedContext}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contextJwt: encodedContext, keyword: searchTerm, page, limit: perPage }),
+        body: JSON.stringify({ keyword: searchTerm, page, limit: perPage }),
       }
     );
 
