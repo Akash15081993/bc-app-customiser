@@ -108,7 +108,7 @@ export async function getSessionJWT(contextJwt: string) {
 }
 
 
-export async function getSession(contextJwt: string) {
+export async function getSession(contextJwt: any) {
     if (typeof contextJwt !== 'string') return;
     const { context: storeHash, user } = decodePayload(contextJwt) as SessionProps;
     const hasUser = await db.hasStoreUser(storeHash, String(user?.id));
