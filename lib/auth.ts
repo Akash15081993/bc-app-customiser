@@ -1,5 +1,4 @@
 import * as jwt from 'jsonwebtoken';
-import { NextApiRequest } from 'next';
 import * as BigCommerce from 'node-bigcommerce';
 import { ApiConfig, QueryParams, SessionContextProps, SessionProps } from '../types';
 import db from './db';
